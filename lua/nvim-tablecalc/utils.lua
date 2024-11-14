@@ -54,8 +54,9 @@ function M.parse_structured_table(content)
   end
 
   -- Call output_data to handle or display rows
-  print(vim.inspect(M.rows))
+  -- print(vim.inspect(M.rows))
   local new_data = M.evaluate_formulas(M.rows)
+  -- print(vim.inspect(new_data))
   M.write_to_buffer(new_data)
 end
 
@@ -65,22 +66,17 @@ function M.evaluate_formulas(table_data)
     for column, values in pairs(table_name) do
       for i, cell in ipairs(values) do
         -- Check if cell contains a formula (starting with `=`)
-        local formula = cell:match("^=%((.+)%)$")
+        local formula = cell:match("^=%((.+)%)")
         if formula then
-          print(formula)
           -- Replace `ColumnName[Index]` pattern with actual values
           local eval_formula = formula:gsub("([%w_]+)%[(%d+)%]", function(col, index)
             index = tonumber(index) -- Convert index to a number
             -- Return the corresponding value if exists, otherwise "0"
-            print(table_name[col][index])
             return tonumber(table_name[col] and table_name[col][index] or "0")
           end)
-          print(eval_formula)
           -- Evaluate the mathematical expression and append result to the cell
           local result = load("return " .. eval_formula)() -- Dangerous if external input, careful!
-          print(result)
-          table_name[column][i] = cell .. ": " .. result   -- Append result to original formula
-          print(vim.inspect(table_data))
+          table_name[column][i] = cell:match("=%b()") .. ": " .. result   -- Append result to original formula
         end
       end
     end
@@ -90,49 +86,35 @@ end
 
 -- Function to write manipulated data back to the buffer
 function M.write_to_buffer(table_data)
-  -- Get the current buffer
-  local bufnr = vim.api.nvim_get_current_buf()
-
-  -- Clear the buffer contents first
-  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {})
-
-  -- Iterate through `table_data` to construct lines for the buffer
-  local lines = {}
-  for table_name, columns in pairs(table_data) do
-    table.insert(lines, "# " .. table_name) -- Insert the table name as a header
-    local header = ""
-    local columns_order = {}
-
-    -- Construct the header row from column names
-    for column_name, _ in pairs(columns) do
-      header = header .. "| " .. column_name .. " "
-      table.insert(columns_order, column_name) -- Keep track of column order for rows
-    end
-    table.insert(lines, header .. "|")         -- Add the header to lines
-
-    -- Construct the separator row
-    local separator = "|"
-    for _ in pairs(columns) do
-      separator = separator .. "---|"
-    end
-    table.insert(lines, separator)
-
-    -- Construct each data row
-    local num_rows = #columns[columns_order[1]]
-    for i = 1, num_rows do
-      local row = "|"
-      for _, col in ipairs(columns_order) do
-        row = row .. " " .. columns[col][i] .. " |" -- Add each cell
+  -- Iterate through each table and its columns
+  for _, columns in pairs(table_data) do
+    for _, rows in pairs(columns) do
+      -- Loop through each row to check for calculated formulas
+      for row_index, cell_content in pairs(rows) do
+        -- Check if cell_content contains a formula with result (e.g., "=(expression): result")
+        local formula, result = cell_content:match("^(=%(.-%)): (.+)$")
+        if formula and result then
+          -- print(formula)
+          -- print(result)
+          -- Search in the buffer for the specific formula location and append result
+          for line_number = 1, vim.api.nvim_buf_line_count(0) do
+            local line_content = vim.api.nvim_buf_get_lines(0, line_number - 1, line_number, false)[1]
+            -- Search for the formula pattern in the current line
+            local col_start, col_end = line_content:find(formula, 1, true)
+            if col_start then
+              -- Append result while keeping the original formula intact
+              local updated_line = line_content:sub(1, col_end) .. ": " .. result
+              vim.api.nvim_buf_set_lines(0, line_number - 1, line_number, false, { updated_line })
+              break -- Stop searching for this formula once replaced
+            end
+          end
+        end
       end
-      table.insert(lines, row)                      -- Add the row to lines
     end
   end
 
-  -- Write all lines back to the buffer
-  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-
-  -- Run the gqgq formatting command for org tables
-  vim.api.nvim_command("normal! gggqG")
+  -- Format buffer with gggqG
+  vim.cmd("normal gggqG")
 end
 
 function M.sum(x_coords, y_coords)
