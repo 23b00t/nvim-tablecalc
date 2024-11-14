@@ -18,6 +18,45 @@ function M.parse_table(content)
   M.output_data()
 end
 
+-- Function to parse a structured table with a header
+function M.parse_structured_table(content)
+  M.rows = {}                   -- Define rows as a global array in M to store the final parsed data
+  local current_table_name = "" -- Variable for storing the current table name
+  local headers = {}            -- Array for storing the header names
+
+  -- Split content by lines
+  for line in content:gmatch("[^\r\n]+") do
+    -- Check if the line starts with a table name (indicated by #)
+    if line:match("^#") then
+      current_table_name = line:match("#%s*(.+)") -- Extract the table name
+      M.rows[current_table_name] = {}             -- Initialize a nested table for this table
+      headers = {}                                -- Reset headers for a new table
+    elseif line:match("|") then
+      -- If headers are not set, parse the header line
+      if #headers == 0 and line:match("Name") then
+        for header in line:gmatch("|%s*([^|]+)%s*") do
+          table.insert(headers, header)
+          M.rows[current_table_name][header] = {} -- Create sub-tables in rows
+        end
+      else
+        -- Parse the table row and map values to corresponding headers
+        local row_index = tonumber(line:match("|%s*(%d+)")) -- Extract row index
+        local col_index = 1
+        for value in line:gmatch("|%s*([^|]+)%s*") do
+          local header = headers[col_index]
+          if row_index then
+            M.rows[current_table_name][header][row_index] = value
+          end
+          col_index = col_index + 1
+        end
+      end
+    end
+  end
+
+  -- Call output_data to handle or display rows
+  print(vim.inspect(M.rows))
+end
+
 function M.sum(x_coords, y_coords)
   if not x_coords then
     x_coords = '1-' .. #M.rows[1]

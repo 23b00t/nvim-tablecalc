@@ -5,7 +5,7 @@ local M = {}
 function M.read_buffer_normal()
   local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
   local content = table.concat(lines, '\n')
-  utils.parse_table(content)
+  utils.parse_structured_table(content)
 end
 
 function M.read_buffer_visual()
