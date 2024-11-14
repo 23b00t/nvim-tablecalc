@@ -33,10 +33,10 @@ function M.parse_structured_table(content)
       headers = {}                                -- Reset headers for a new table
     elseif line:match("|") then
       -- If headers are not set, parse the header line
-      if #headers == 0 and line:match("Name") then
+      if #headers == 0 then
         for header in line:gmatch("|%s*([^|]+)%s*") do
-          table.insert(headers, header)
-          M.rows[current_table_name][header] = {} -- Create sub-tables in rows
+          table.insert(headers, M.stripe(header))
+          M.rows[current_table_name][M.stripe(header)] = {} -- Create sub-tables in rows
         end
       else
         -- Parse the table row and map values to corresponding headers
@@ -45,7 +45,7 @@ function M.parse_structured_table(content)
         for value in line:gmatch("|%s*([^|]+)%s*") do
           local header = headers[col_index]
           if row_index then
-            M.rows[current_table_name][header][row_index] = value
+            M.rows[current_table_name][header][row_index] = M.stripe(value)
           end
           col_index = col_index + 1
         end
@@ -55,6 +55,84 @@ function M.parse_structured_table(content)
 
   -- Call output_data to handle or display rows
   print(vim.inspect(M.rows))
+  local new_data = M.evaluate_formulas(M.rows)
+  M.write_to_buffer(new_data)
+end
+
+function M.evaluate_formulas(table_data)
+  -- Loop over each row and column in the parsed table
+  for _, table_name in pairs(table_data) do
+    for column, values in pairs(table_name) do
+      for i, cell in ipairs(values) do
+        -- Check if cell contains a formula (starting with `=`)
+        local formula = cell:match("^=%((.+)%)$")
+        if formula then
+          print(formula)
+          -- Replace `ColumnName[Index]` pattern with actual values
+          local eval_formula = formula:gsub("([%w_]+)%[(%d+)%]", function(col, index)
+            index = tonumber(index) -- Convert index to a number
+            -- Return the corresponding value if exists, otherwise "0"
+            print(table_name[col][index])
+            return tonumber(table_name[col] and table_name[col][index] or "0")
+          end)
+          print(eval_formula)
+          -- Evaluate the mathematical expression and append result to the cell
+          local result = load("return " .. eval_formula)() -- Dangerous if external input, careful!
+          print(result)
+          table_name[column][i] = cell .. ": " .. result   -- Append result to original formula
+          print(vim.inspect(table_data))
+        end
+      end
+    end
+  end
+  return table_data
+end
+
+-- Function to write manipulated data back to the buffer
+function M.write_to_buffer(table_data)
+  -- Get the current buffer
+  local bufnr = vim.api.nvim_get_current_buf()
+
+  -- Clear the buffer contents first
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {})
+
+  -- Iterate through `table_data` to construct lines for the buffer
+  local lines = {}
+  for table_name, columns in pairs(table_data) do
+    table.insert(lines, "# " .. table_name) -- Insert the table name as a header
+    local header = ""
+    local columns_order = {}
+
+    -- Construct the header row from column names
+    for column_name, _ in pairs(columns) do
+      header = header .. "| " .. column_name .. " "
+      table.insert(columns_order, column_name) -- Keep track of column order for rows
+    end
+    table.insert(lines, header .. "|")         -- Add the header to lines
+
+    -- Construct the separator row
+    local separator = "|"
+    for _ in pairs(columns) do
+      separator = separator .. "---|"
+    end
+    table.insert(lines, separator)
+
+    -- Construct each data row
+    local num_rows = #columns[columns_order[1]]
+    for i = 1, num_rows do
+      local row = "|"
+      for _, col in ipairs(columns_order) do
+        row = row .. " " .. columns[col][i] .. " |" -- Add each cell
+      end
+      table.insert(lines, row)                      -- Add the row to lines
+    end
+  end
+
+  -- Write all lines back to the buffer
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+
+  -- Run the gqgq formatting command for org tables
+  vim.api.nvim_command("normal! gggqG")
 end
 
 function M.sum(x_coords, y_coords)
@@ -122,6 +200,10 @@ function M.output_data()
     end
     print(row_output) -- Output the entire row
   end
+end
+
+function M.stripe(str)
+  return (str or ""):match("^%s*(.-)%s*$")
 end
 
 return M
