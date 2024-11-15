@@ -2,23 +2,6 @@
 local M = {}
 local config = require('nvim-tablecalc.config')
 
--- Parses table data from a given string content
-function M.parse_table(content)
-  M.rows = {} -- Initialize global rows table to store parsed rows
-  for line in content:gmatch("[^\r\n]+") do
-    -- Only parse lines that contain actual content and the delimiter
-    if line:find("[a-zA-Z0-9]") and line:find(config.delimiter) then
-      local columns = {}
-      -- Split the line into columns using the delimiter
-      for col in line:gmatch("[^" .. config.delimiter .. "]+") do
-        table.insert(columns, col)
-      end
-      table.insert(M.rows, columns) -- Add the parsed columns to the rows table
-    end
-  end
-  M.output_data() -- Output the parsed rows (if necessary)
-end
-
 -- Parses a structured table with headers and stores it in a nested format
 function M.parse_structured_table(content)
   M.rows = {} -- Global array to store all parsed tables
