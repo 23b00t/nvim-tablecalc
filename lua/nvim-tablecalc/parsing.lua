@@ -12,13 +12,15 @@ function M.parse_structured_table(content)
   for line in content:gmatch("[^\r\n]+") do
     -- Detect table names, marked by a line starting with `#`
     if line:match("^#") then
-      current_table_name = line:match("#%s*(.+)") -- Extract the table name
+      current_table_name = line:match("#%s*.-%s(%w+)%s*$") -- Extract the table name
       M.rows[current_table_name] = {} -- Initialize a table for the extracted name
       headers = {} -- Reset headers for the new table
     elseif line:match(config.delimiter) then
       -- If headers are not set, parse the current line as the header row
       if #headers == 0 then
-        for header in line:gmatch("|%s*([^|]+)%s*") do
+        for header in line:gmatch(config.delimiter .. "%s*([^" .. config.delimiter .. "]+)%s*") do
+          header = header:match("%s*(%w+)%s*$")
+          print(header)
           table.insert(headers, utils.stripe(header)) -- Clean and add header
           M.rows[current_table_name][utils.stripe(header)] = {} -- Create sub-tables for headers
         end
@@ -39,8 +41,8 @@ function M.parse_structured_table(content)
   end
 
   -- Process formulas and update table data
+  -- print(vim.inspect(M.rows))
   local new_data = utils.extract_formulas(M.rows)
-  print('test')
   utils.write_to_buffer(new_data) -- Write the updated data back to the buffer
 end
 
