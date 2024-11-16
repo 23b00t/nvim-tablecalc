@@ -44,31 +44,31 @@ end
 
 -- Resolves references in a formula to their corresponding values
 function M.resolve_expression(expression)
+  print(expression)
   -- Check for M.sum calls and resolve them
-  -- expression = expression:gsub("sum%((%w+),%s*(%w+),?%s*(%w)%)", function(table_name, column_name, field_num)
-  --   print(table_name)
-  --   print(column_name)
-  --   print(field_num)
-  --   if not field_num then
-  --     M.data = M.rows[table_name][column_name]
-  --   elseif column_name == 'nil' then
-  --     for _, column in pairs(M.rows[table_name]) do
-  --       print(vim.inspect(column))
-  --       table.insert(M.data, column[field_num]) -- Insert the value from the specific field into M.data
-  --     end
-  --   end
-  --   -- return "M.sum"
-  -- end)
+  expression = expression:gsub("sum%((%w+),%s*(%w+),?%s*(%d*)%)", function(table_name, column_name, row_index)
+    if row_index == '' then
+      M.data = M.rows[table_name][column_name]
+    elseif column_name == 'nil' then
+      M.data = {}
+      local table_data = M.rows[table_name] -- Get the table data by name
+      for header, column in pairs(table_data) do
+        if not header:match("^%s*$") then
+          table.insert(M.data, column[tonumber(row_index)]) -- Insert the value from the specific field into M.data
+        end
+      end
+    end
+    return "M.sum"
+  end)
 
   -- Replace references of the form Table.Column.Row with actual values
-  -- TODO: If numbers put just return theme
   return expression:gsub("(%w+).(%w+).(%d+)", function(table_name, column_name, row_index)
     local table_data = M.rows[table_name] -- Get the table data by name
     if table_data and table_data[column_name] then
       local row_value = table_data[column_name][tonumber(row_index)]
       return tostring(row_value) -- Convert the value to a string for Lua expressions
     else
-      error("Invalid reference: " )
+      error("Invalid reference: ")
     end
   end)
 end
@@ -100,7 +100,7 @@ function M.write_to_buffer(table_data)
   end
 
   -- Format the buffer (e.g., re-align text)
-  vim.cmd(config.get_command())
+  -- vim.cmd(config.get_command())
 end
 
 -- Utility function to trim whitespace from strings
