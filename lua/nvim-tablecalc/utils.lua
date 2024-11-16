@@ -24,24 +24,43 @@ end
 -- Evaluates a mathematical formula
 function M.evaluate_formula(formula)
   -- Resolve references in the formula to their actual values
+  print("Formula:", formula)
   local expression = M.resolve_expression(formula)
-  -- Execute the mathematical expression and return the result
-  local func = load("return " .. expression)
+  print("Expression:", expression)
+
+  if expression:match("sum") then
+    return M.sum()
+  end
+  -- Load the expression in the context of the environment
+  local func, err = load("return " .. expression)
   if func then
-    return func()
+    return func() -- Führe die Funktion aus und gib das Ergebnis zurück
+  else
+    print("Error in evaluating formula:", err)
   end
 end
 
 -- Resolves references in a formula to their corresponding values
 function M.resolve_expression(expression)
+  -- Check for M.sum calls and resolve them
+  expression = expression:gsub("sum%((%w+),%s*(%w+)%)", function(table_name, column_name)
+    if not M.rows[table_name] or not M.rows[table_name][column_name] then
+      error("Invalid table or column reference in M.sum: " .. table_name .. ", " .. column_name)
+    end
+    M.data = M.rows[table_name][column_name]
+    -- Replace M.sum(t, N) with the actual function call in Lua
+    -- return string.format("M.sum('%s')", vim.inspect(data))
+    return "M.sum"
+  end)
+
   -- Replace references of the form Table[Column[Row]] with actual values
-  return expression:gsub("(%w+)%[(%a+)%[(%d+)%]%]", function(table_name, col_name, index)
+  return expression:gsub("(%w+)%[(%w+)%[(%d+)%]%]", function(table_name, column_name, row_index)
     local table_data = M.rows[table_name] -- Get the table data by name
-    if table_data and table_data[col_name] then
-      local col_index = tonumber(index)
-      return table_data[col_name][col_index] -- Return the value at the specified index
+    if table_data and table_data[column_name] then
+      local row_value = table_data[column_name][tonumber(row_index)]
+      return tostring(row_value) -- Convert the value to a string for Lua expressions
     else
-      error("Invalid reference: " .. table_name .. "[" .. col_name .. "[" .. index .. "]]")
+      error("Invalid reference: " .. table_name .. "[" .. column_name .. "[" .. row_index .. "]]")
     end
   end)
 end
@@ -72,12 +91,25 @@ function M.write_to_buffer(table_data)
   end
 
   -- Format the buffer (e.g., re-align text)
-  vim.cmd("normal gggqG")
+  -- vim.cmd("normal gggqG")
 end
 
 -- Utility function to trim whitespace from strings
 function M.stripe(str)
   return (str or ""):match("^%s*(.-)%s*$")
+end
+
+-- Sum columns
+function M.sum()
+  local sum = 0
+
+  for i = 1, #M.data do
+    print(M.data[i])
+    if tonumber(M.data[i]) then
+      sum = sum + tonumber(M.data[i])
+    end
+  end
+  return sum
 end
 
 return M
