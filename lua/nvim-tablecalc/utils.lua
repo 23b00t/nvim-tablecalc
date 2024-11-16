@@ -3,18 +3,19 @@ local M = {}
 local config = require('nvim-tablecalc.config')
 
 -- Extracts and evaluates formulas from a table and appends the result
-function M.extract_formulas(table_data)
+function M.process_data(table_data)
   M.rows = table_data
   -- Iterate through all tables and their columns
   for _, table_name in pairs(table_data) do
     for column, values in pairs(table_name) do
       for i, cell in ipairs(values) do
         -- Detect if the cell contains a formula (starts with `=`)
-        local formula = cell:match("^=%((.+)%)")
+        local match_expr = "^%" .. config.formula_begin .. "(.+)%" .. config.formula_end
+        local formula = cell:match(match_expr)
         if formula then
           -- Evaluate the formula and append the result to the cell
           local result = M.evaluate_formula(formula)
-          table_name[column][i] = cell:match("=%b()") .. ": " .. result
+          table_name[column][i] = config.formula_begin .. formula .. config.formula_end .. ": " .. result
         end
       end
     end
@@ -25,9 +26,9 @@ end
 -- Evaluates a mathematical formula
 function M.evaluate_formula(formula)
   -- Resolve references in the formula to their actual values
-  print("Formula:", formula)
+  -- print("Formula:", formula)
   local expression = M.resolve_expression(formula)
-  print("Expression:", expression)
+  -- print("Expression:", expression)
 
   if expression:match("sum") then
     return M.sum()
@@ -73,7 +74,7 @@ function M.write_to_buffer(table_data)
     for _, rows in pairs(columns) do
       -- Process each cell to append results to formulas
       for _, cell_content in pairs(rows) do
-        local formula, result = cell_content:match("^(=%(.-%)): (.+)$")
+        local formula, result = cell_content:match("^(%" .. config.formula_begin .. ".-%" .. config.formula_end .. "): (.+)$")
         if formula and result then
           -- Search the buffer for the formula and append the result
           for line_number = 1, vim.api.nvim_buf_line_count(0) do

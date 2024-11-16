@@ -11,9 +11,9 @@ function M.parse_structured_table(content)
   -- Split content into lines and process each line
   for line in content:gmatch("[^\r\n]+") do
     -- Detect table names, marked by a line starting with `#`
-    if line:match("^#") then
+    if line:match("^" .. config.table_name_marker) then
       -- Extract the table name, the last word in a row beginning with #
-      current_table_name = line:match("#%s*.-%s(%w+)%s*$")
+      current_table_name = line:match(config.table_name_marker .. "%s*.-%s(%w+)%s*$")
       M.rows[current_table_name] = {} -- Initialize a table for the extracted name
       headers = {}                    -- Reset headers for the new table
     elseif line:match(config.delimiter) then
@@ -43,8 +43,8 @@ function M.parse_structured_table(content)
 
   -- Process formulas and update table data
   -- print(vim.inspect(M.rows))
-  local new_data = utils.extract_formulas(M.rows)
-  utils.write_to_buffer(new_data) -- Write the updated data back to the buffer
+  local result = utils.process_data(M.rows)
+  utils.write_to_buffer(result) -- Write the updated data back to the buffer
 end
 
 return M

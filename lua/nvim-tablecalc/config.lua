@@ -1,6 +1,9 @@
 local config = {
   -- Set the delimiter used for tables (e.g., '|' for pipe-separated tables)
   delimiter = '|',
+  formula_begin = '{',
+  formula_end = '}',
+  table_name_marker = '#',
   filetype = 'org',
   commands = {
     org = 'normal gggqG',
