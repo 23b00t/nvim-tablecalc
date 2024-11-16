@@ -1,5 +1,6 @@
 -- lua/nvim-tablecalc/utils.lua
 local M = {}
+local config = require('nvim-tablecalc.config')
 
 -- Extracts and evaluates formulas from a table and appends the result
 function M.extract_formulas(table_data)
@@ -91,7 +92,7 @@ function M.write_to_buffer(table_data)
   end
 
   -- Format the buffer (e.g., re-align text)
-  -- vim.cmd("normal gggqG")
+  vim.cmd(config.get_command())
 end
 
 -- Utility function to trim whitespace from strings
