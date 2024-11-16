@@ -45,24 +45,30 @@ end
 -- Resolves references in a formula to their corresponding values
 function M.resolve_expression(expression)
   -- Check for M.sum calls and resolve them
-  expression = expression:gsub("sum%((%w+),%s*(%w+)%)", function(table_name, column_name)
-    if not M.rows[table_name] or not M.rows[table_name][column_name] then
-      error("Invalid table or column reference in M.sum: " .. table_name .. ", " .. column_name)
-    end
-    M.data = M.rows[table_name][column_name]
-    -- Replace M.sum(t, N) with the actual function call in Lua
-    -- return string.format("M.sum('%s')", vim.inspect(data))
-    return "M.sum"
-  end)
+  -- expression = expression:gsub("sum%((%w+),%s*(%w+),?%s*(%w)%)", function(table_name, column_name, field_num)
+  --   print(table_name)
+  --   print(column_name)
+  --   print(field_num)
+  --   if not field_num then
+  --     M.data = M.rows[table_name][column_name]
+  --   elseif column_name == 'nil' then
+  --     for _, column in pairs(M.rows[table_name]) do
+  --       print(vim.inspect(column))
+  --       table.insert(M.data, column[field_num]) -- Insert the value from the specific field into M.data
+  --     end
+  --   end
+  --   -- return "M.sum"
+  -- end)
 
-  -- Replace references of the form Table[Column[Row]] with actual values
-  return expression:gsub("(%w+)%[(%w+)%[(%d+)%]%]", function(table_name, column_name, row_index)
+  -- Replace references of the form Table.Column.Row with actual values
+  -- TODO: If numbers put just return theme
+  return expression:gsub("(%w+).(%w+).(%d+)", function(table_name, column_name, row_index)
     local table_data = M.rows[table_name] -- Get the table data by name
     if table_data and table_data[column_name] then
       local row_value = table_data[column_name][tonumber(row_index)]
       return tostring(row_value) -- Convert the value to a string for Lua expressions
     else
-      error("Invalid reference: " .. table_name .. "[" .. column_name .. "[" .. row_index .. "]]")
+      error("Invalid reference: " )
     end
   end)
 end
@@ -74,7 +80,8 @@ function M.write_to_buffer(table_data)
     for _, rows in pairs(columns) do
       -- Process each cell to append results to formulas
       for _, cell_content in pairs(rows) do
-        local formula, result = cell_content:match("^(%" .. config.formula_begin .. ".-%" .. config.formula_end .. "): (.+)$")
+        local formula, result = cell_content:match("^(%" ..
+          config.formula_begin .. ".-%" .. config.formula_end .. "): (.+)$")
         if formula and result then
           -- Search the buffer for the formula and append the result
           for line_number = 1, vim.api.nvim_buf_line_count(0) do
@@ -106,7 +113,6 @@ function M.sum()
   local sum = 0
 
   for i = 1, #M.data do
-    print(M.data[i])
     if tonumber(M.data[i]) then
       sum = sum + tonumber(M.data[i])
     end
