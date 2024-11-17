@@ -1,19 +1,25 @@
-local config = {
-  -- Set the delimiter used for tables (e.g., '|' for pipe-separated tables)
-  delimiter = '|',
-  formula_begin = '{',
-  formula_end = '}',
-  table_name_marker = '#',
-  filetype = 'org',
-  commands = {
-    org = 'normal gggqG',
-    -- TODO: md = '',
-    -- csv?
-  }
-}
+-- lua/nvim-tablecalc/config.lua
+local Config = {}
+Config.__index = Config
 
-function config.get_command()
-    return config.commands[config.filetype] or error("Invalid filetype in config")
+-- Constructor
+function Config.new()
+  local self = setmetatable({}, Config)
+  self.delimiter = '|'
+  self.formula_begin = '{'
+  self.formula_end = '}'
+  self.table_name_marker = '#'
+  self.filetype = 'org'
+  self.commands = {
+    org = 'normal gggqG',
+    -- TODO: Add more filetypes, e.g., md, csv
+  }
+  return self
 end
 
-return config
+-- Get the command for the current filetype
+function Config:get_command()
+  return self.commands[self.filetype] or error("Invalid filetype in config")
+end
+
+return Config
