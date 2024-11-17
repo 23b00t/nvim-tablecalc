@@ -1,23 +1,14 @@
 -- lua/nvim-tablecalc/parsing.lua
 local Parsing = {}
-local config = require('nvim-tablecalc.config').new()  -- Erstelle eine Instanz von Config
+local config = require('nvim-tablecalc.config').new()  -- Instantiating Config directly
 local utils = require('nvim-tablecalc.utils')
 
 Parsing.__index = Parsing
-local instance = nil
 
--- Singleton-Methode: Gibt immer dieselbe Instanz zurück
-function Parsing.get_instance()
-  if not instance then
-    instance = Parsing.new()
-  end
-  return instance
-end
-
--- Konstruktor
+-- Create a new Parsing instance
 function Parsing.new()
   local self = setmetatable({}, Parsing)
-  self.rows = {}  -- Initialisiere die Zeilen für jede Instanz
+  self.rows = {}  -- Initialize rows for each instance
   return self
 end
 
@@ -60,8 +51,8 @@ function Parsing:parse_structured_table(content)
   end
 
   -- After parsing the structured table, process the data (handle formulas, etc.)
-  utils.process_data(self.rows)  -- Process formulas and update the table data
-  utils.write_to_buffer(self.rows)  -- Write the updated data back to the buffer
+  utils:process_data(self.rows)  -- Process formulas and update the table data
+  -- utils.write_to_buffer(self.rows)  -- Write the updated data back to the buffer
 end
 
 return Parsing

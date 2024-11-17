@@ -1,24 +1,18 @@
 -- lua/nvim-tablecalc/core.lua
 local Parsing = require('nvim-tablecalc.parsing')
 
+-- Core Module
 local Core = {}
 Core.__index = Core
-local instance = nil
 
--- Singleton-Methode: Gibt immer dieselbe Instanz zurück
-function Core.get_instance()
-  if not instance then
-    instance = Core.new()
-  end
-  return instance
-end
-
--- Konstruktor
+-- Create a new Core instance
 function Core.new()
   local self = setmetatable({}, Core)
-  self.parsing = Parsing.get_instance()  -- Hole die Instanz von Parsing
+  self.parsing = Parsing.new()  -- Initialize Parsing instance
   return self
 end
+
+-- Singleton method removed. Use Core.new() directly.
 
 -- Read the entire buffer in normal mode
 function Core:read_buffer_normal()
