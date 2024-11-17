@@ -1,12 +1,14 @@
 -- lua/nvim-tablecalc/utils.lua
 local Utils = {}
-local config = require('nvim-tablecalc.config').new()
+-- local config = require('nvim-tablecalc.config').new()
 
 Utils.__index = Utils
 
 -- Create a new Utils self
-function Utils.new()
+function Utils.new(table_calc_instance)
   local self = setmetatable({}, Utils)
+  self.table_calc_instance = table_calc_instance
+  self.config = self.table_calc_instance:get_config()
   self.rows = {}  -- Initialize rows for each self
   return self
 end
@@ -19,18 +21,18 @@ function Utils:process_data(table_data)
     for column, values in pairs(table_name) do
       for i, cell in ipairs(values) do
         -- Detect if the cell contains a formula (starts with `=`)
-        local match_expr = "^%" .. config.formula_begin .. "(.+)%" .. config.formula_end
+        local match_expr = "^%" .. self.config.formula_begin .. "(.+)%" .. self.config.formula_end
         local formula = cell:match(match_expr)
         if formula then
           -- Evaluate the formula and append the result to the cell
           local result = self:evaluate_formula(formula)
-          table_name[column][i] = config.formula_begin .. formula .. config.formula_end .. ": " .. result
+          table_name[column][i] = self.config.formula_begin .. formula .. self.config.formula_end .. ": " .. result
         end
       end
     end
   end
   -- return table_data -- Return the updated table data
-  self.write_to_buffer(self.rows)
+  self:write_to_buffer(self.rows)
 end
 
 -- Evaluates a mathematical formula
@@ -80,12 +82,12 @@ function Utils:resolve_expression(expression)
 end
 
 -- Writes the modified table data back to the buffer
-function Utils.write_to_buffer(table_data)
+function Utils:write_to_buffer(table_data)
   for _, columns in pairs(table_data) do
     for _, rows in pairs(columns) do
       for _, cell_content in pairs(rows) do
         local formula, result = cell_content:match("^(%" ..
-          config.formula_begin .. ".-%" .. config.formula_end .. "): (.+)$")
+          self.config.formula_begin .. ".-%" .. self.config.formula_end .. "): (.+)$")
         if formula and result then
           for line_number = 1, vim.api.nvim_buf_line_count(0) do
             local line_content = vim.api.nvim_buf_get_lines(0, line_number - 1, line_number, false)[1]
@@ -100,7 +102,7 @@ function Utils.write_to_buffer(table_data)
       end
     end
   end
-  vim.cmd(config:get_command())
+  vim.cmd(self.config:get_command())
 end
 
 -- Utility function to trim whitespace from strings

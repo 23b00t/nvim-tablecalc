@@ -1,14 +1,12 @@
 -- lua/nvim-tablecalc/core.lua
-local Parsing = require('nvim-tablecalc.parsing')
-
--- Core Module
 local Core = {}
 Core.__index = Core
 
 -- Create a new Core instance
-function Core.new()
+function Core.new(table_calc_instance)
   local self = setmetatable({}, Core)
-  self.parsing = Parsing.new()  -- Initialize Parsing instance
+  self.table_calc_instance = table_calc_instance
+  self.parsing = self.table_calc_instance:get_parsing()
   return self
 end
 
