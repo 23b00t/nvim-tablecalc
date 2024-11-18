@@ -23,18 +23,10 @@ function Parsing.new(table_calc_instance)
   return self
 end
 
---- Clears the current parsing state
-function Parsing:reset()
-  -- Reset the rows to an empty table
-  self.rows = {}
-end
-
 --- Parses a structured table with headers and stores it in a nested format
 ---@param content string The content to be parsed, containing table data
 ---@return table The parsed rows stored in a nested table format
 function Parsing:parse_structured_table(content)
-  -- Reset the current state before parsing
-  self:reset()
   local current_table_name = "" -- Variable to track the current table name
   local headers = {}            -- Array to store the column headers of the current table
 

@@ -3,7 +3,7 @@
 ---@class TableCalc
 ---@field config Config Configuration object
 ---@field utils Utils Utility functions
----@field parsing Parsing Parsing functions
+---@field parsing Parsing Parsing functions (new instance created on each call to get_instance)
 ---@field core Core Core functionality
 ---@field setup_done boolean Flag to indicate if setup is complete
 local TableCalc = {}
@@ -11,11 +11,14 @@ TableCalc.__index = TableCalc
 local instance = nil
 
 --- Singleton method to get the instance of TableCalc
+--- Creates a new instance of Parsing each time it's called to reset its data
 ---@return TableCalc The singleton instance of TableCalc
 function TableCalc.get_instance()
   if not instance then
     instance = TableCalc.new()
   end
+  -- Instanciate with every call a new Parsing to reset its data
+  instance.parsing = require('nvim-tablecalc.parsing').new(instance)
   return instance
 end
 
@@ -26,7 +29,6 @@ function TableCalc.new()
   -- Initialize the required components for TableCalc
   self.config = require('nvim-tablecalc.config').new()
   self.utils = require('nvim-tablecalc.utils').new(self)
-  self.parsing = require('nvim-tablecalc.parsing').new(self)
   self.core = require('nvim-tablecalc.core').new(self)
   self.setup_done = false
   return self
