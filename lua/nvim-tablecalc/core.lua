@@ -23,6 +23,8 @@ end
 function Core:read_buffer_normal()
   -- Get all lines from the buffer and concatenate them into a single string
   local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  print(vim.inspect(table.concat(lines, '\n')))
+  error()
   return table.concat(lines, '\n')
 end
 
@@ -40,6 +42,7 @@ function Core:read_buffer_visual()
 
   -- Get the lines within the visual selection and concatenate them into a string
   local lines = vim.api.nvim_buf_get_lines(0, start_pos[1] - 1, end_pos[1], false)
+
   return table.concat(lines, '\n')
 end
 
