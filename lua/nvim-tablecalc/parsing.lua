@@ -62,7 +62,6 @@ function Parsing:parse_structured_table(content)
       end
     end
   end
-
   -- After parsing the structured table, return the parsed rows
   return self.rows
 end
