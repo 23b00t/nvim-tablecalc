@@ -1,43 +1,56 @@
 -- lua/nvim-tablecalc/parsing.lua
+
+---@class Parsing
+---@field table_calc_instance TableCalc Instance of the TableCalc class
+---@field config Config Configuration object for TableCalc
+---@field utils Utils Utility functions for parsing
+---@field rows table A table storing parsed rows, structured by table names and headers
 local Parsing = {}
--- local utils = require('nvim-tablecalc.utils')
 
 Parsing.__index = Parsing
 
--- Create a new Parsing instance
+--- Creates a new instance of Parsing
+---@param table_calc_instance TableCalc The instance of the TableCalc class
+---@return Parsing A new instance of the Parsing class
 function Parsing.new(table_calc_instance)
   local self = setmetatable({}, Parsing)
+  -- Store the reference to the TableCalc instance
   self.table_calc_instance = table_calc_instance
+  -- Get the configuration and utilities from the TableCalc instance
   self.config = self.table_calc_instance:get_config()
   self.utils = self.table_calc_instance:get_utils()
-  self.rows = {}
+  self.rows = {} -- Initialize an empty table to store rows
   return self
 end
 
--- Clears the current parsing state
+--- Clears the current parsing state
 function Parsing:reset()
+  -- Reset the rows to an empty table
   self.rows = {}
 end
 
--- Parses a structured table with headers and stores it in a nested format
+--- Parses a structured table with headers and stores it in a nested format
+---@param content string The content to be parsed, containing table data
+---@return table The parsed rows stored in a nested table format
 function Parsing:parse_structured_table(content)
+  -- Reset the current state before parsing
   self:reset()
-  local current_table_name = "" -- Variable to keep track of the current table name
+  local current_table_name = "" -- Variable to track the current table name
   local headers = {}            -- Array to store the column headers of the current table
 
   -- Split content into lines and process each line
   for line in content:gmatch("[^\r\n]+") do
     -- Detect table names, marked by a line starting with `#`
     if line:match("^" .. self.config.table_name_marker) then
-      -- Extract the table name, the last word in a row beginning with #
+      -- Extract the table name (last word after the `#`)
       current_table_name = line:match(self.config.table_name_marker .. "%s*.-%s(%w+)%s*$")
-      self.rows[current_table_name] = {} -- Initialize a table for the extracted name
+      self.rows[current_table_name] = {} -- Initialize a table for the extracted table name
       headers = {}                       -- Reset headers for the new table
     elseif line:match(self.config.delimiter) then
       -- If headers are not set, parse the current line as the header row
       if #headers == 0 then
         for header in line:gmatch(self.config.delimiter .. "%s*([^" .. self.config.delimiter .. "]+)%s*") do
-          -- Extract last word to use as alias
+          -- Extract and clean the header, then store it
           header = header:match("%s*(%w+)%s*$")
           table.insert(headers, self.utils.stripe(header))              -- Clean and add header
           self.rows[current_table_name][self.utils.stripe(header)] = {} -- Create sub-tables for headers
@@ -58,7 +71,7 @@ function Parsing:parse_structured_table(content)
     end
   end
 
-  -- After parsing the structured table, process the data (handle formulas, etc.)
+  -- After parsing the structured table, return the parsed rows
   return self.rows
 end
 

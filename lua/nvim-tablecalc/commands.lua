@@ -1,21 +1,24 @@
 -- lua/nvim-tablecalc/commands.lua
+
+---@class Commands
 local Commands = {}
 Commands.__index = Commands
 
--- Konstruktor
+--- Constructor for Commands class
+---@return Commands A new instance of the Commands class
 function Commands.new()
   local self = setmetatable({}, Commands)
   return self
 end
 
--- Setup-Methode
+--- Setup method to map keybindings for normal and visual modes
 function Commands.setup()
-  -- Mapping für Normalmodus
+  -- Key mapping for normal mode
   vim.api.nvim_set_keymap('n', '<leader>tc',
     ':lua require("nvim-tablecalc").get_instance():run_normal()<CR>',
     { noremap = true, silent = true })
 
-  -- Mapping für Visualmodus
+  -- Key mapping for visual mode
   vim.api.nvim_set_keymap('v', '<leader>tc',
     ':lua require("nvim-tablecalc").get_instance():run_visual()<CR>',
     { noremap = true, silent = true })
