@@ -14,21 +14,34 @@ end
 -- Konstruktor
 function TableCalc.new()
   local self = setmetatable({}, TableCalc)
-  self.commands = require('nvim-tablecalc.commands').new()     -- Instanziiere Commands mit TableCalc-Instanz
-  self.config = require('nvim-tablecalc.config').new()         -- Instanziiere Config
+  self.config = require('nvim-tablecalc.config').new()
   self.utils = require('nvim-tablecalc.utils').new(self)
-  self.parsing = require('nvim-tablecalc.parsing').new(self)   -- Instanziiere Parsing
-  self.core = require('nvim-tablecalc.core').new(self)         -- Instanziiere Core
-  self.setup_done = false                                      -- Flag, das anzeigt, ob setup() bereits ausgeführt wurde
+  self.parsing = require('nvim-tablecalc.parsing').new(self)
+  self.core = require('nvim-tablecalc.core').new(self)
+  self.setup_done = false
   return self
 end
 
 -- Setup-Methode
 function TableCalc:setup()
   if not self.setup_done then -- Prüfe, ob setup() schon ausgeführt wurde
-    self.commands:setup()     -- Setzt die Keybindings
+    require('nvim-tablecalc.commands').setup()     -- Setzt die Keybindings
     self.setup_done = true    -- Markiere, dass setup() ausgeführt wurde
   end
+end
+
+function TableCalc:run_normal()
+  local content = self.core:read_buffer_normal()
+  local tables = self.parsing:parse_structured_table(content)
+  local modified_data = self.utils:process_data(tables)
+  self.core:write_to_buffer(modified_data)
+end
+
+function TableCalc:run_visual()
+  local content = self.core:read_buffer_visual()
+  local tables = self.parsing:parse_structured_table(content)
+  local modified_data = self.utils:process_data(tables)
+  self.core:write_to_buffer(modified_data)
 end
 
 function TableCalc:get_config()

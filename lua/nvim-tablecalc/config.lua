@@ -22,4 +22,8 @@ function Config:get_command()
   return self.commands[self.filetype] or error("Invalid filetype in config")
 end
 
+function Config:autoformat_buffer()
+  return self:get_command()
+end
+
 return Config

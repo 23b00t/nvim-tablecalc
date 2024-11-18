@@ -32,7 +32,8 @@ function Utils:process_data(table_data)
     end
   end
   -- return table_data -- Return the updated table data
-  self:write_to_buffer(self.rows)
+  -- self:write_to_buffer(self.rows)
+  return self.rows
 end
 
 -- Evaluates a mathematical formula
@@ -79,30 +80,6 @@ function Utils:resolve_expression(expression)
       error("Invalid reference: ")
     end
   end)
-end
-
--- Writes the modified table data back to the buffer
-function Utils:write_to_buffer(table_data)
-  for _, columns in pairs(table_data) do
-    for _, rows in pairs(columns) do
-      for _, cell_content in pairs(rows) do
-        local formula, result = cell_content:match("^(%" ..
-          self.config.formula_begin .. ".-%" .. self.config.formula_end .. "): (.+)$")
-        if formula and result then
-          for line_number = 1, vim.api.nvim_buf_line_count(0) do
-            local line_content = vim.api.nvim_buf_get_lines(0, line_number - 1, line_number, false)[1]
-            local col_start, col_end = line_content:find(formula, 1, true)
-            if col_start then
-              local updated_line = line_content:sub(1, col_end) .. ": " .. result
-              vim.api.nvim_buf_set_lines(0, line_number - 1, line_number, false, { updated_line })
-              break
-            end
-          end
-        end
-      end
-    end
-  end
-  vim.cmd(self.config:get_command())
 end
 
 -- Utility function to trim whitespace from strings

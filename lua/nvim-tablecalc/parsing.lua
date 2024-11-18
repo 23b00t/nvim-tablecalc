@@ -59,8 +59,7 @@ function Parsing:parse_structured_table(content)
   end
 
   -- After parsing the structured table, process the data (handle formulas, etc.)
-  self.utils:process_data(self.rows) -- Process formulas and update the table data
-  -- self.utils.write_to_buffer(self.rows)  -- Write the updated data back to the buffer
+  return self.rows
 end
 
 return Parsing
