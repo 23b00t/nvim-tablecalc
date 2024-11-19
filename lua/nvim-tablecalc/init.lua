@@ -35,10 +35,13 @@ function TableCalc.new()
 end
 
 --- Setup method to initialize commands for TableCalc
-function TableCalc:setup()
+function TableCalc:setup(user_setup)
   if not self.setup_done then
     -- Set up commands for the TableCalc
     require('nvim-tablecalc.commands').setup()
+    if user_setup then
+      self.config:set_user_config(user_setup)
+    end
     self.setup_done = true
   end
 end

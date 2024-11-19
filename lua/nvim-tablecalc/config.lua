@@ -6,6 +6,7 @@
 ---@field formula_end string The character marking the end of a formula
 ---@field table_name_marker string The character used to mark table names
 ---@field filetype string The current file type (default is 'org')
+---@field user_command string Finishing command set by user
 ---@field commands table A table mapping file types to commands
 local Config = {}
 Config.__index = Config
@@ -19,7 +20,7 @@ function Config.new()
   self.formula_begin = '{'
   self.formula_end = '}'
   self.table_name_marker = '#'
-  self.filetype = 'org'
+  self.user_command = nil
   self.commands = {
     org = 'normal gggqG',
     -- TODO: Add more filetypes, e.g., md, csv
@@ -29,15 +30,31 @@ end
 
 --- Gets the command associated with the current filetype
 ---@return string The command for the current filetype
----@throws Error if the filetype is not valid in the config
 function Config:get_command()
-  return self.commands[self.filetype] or error("Invalid filetype in config")
+  if self.user_command then
+    return self.user_command
+  else
+    return self.commands[vim.bo.filetype] or ''
+  end
 end
 
 --- Returns the command to autoformat the buffer based on the current filetype
 ---@return string The autoformat command for the buffer
 function Config:autoformat_buffer()
   return self:get_command()
+end
+
+---@param user_config table
+-- INFO: Custom config:
+-- config = function()
+--   require("nvim-tablecalc").get_instance():setup({ table_name_marker = '+' })
+-- end,
+function Config:set_user_config(user_config)
+  for key, value in pairs(user_config) do
+    if self[key] then
+      self[key] = value
+    end
+  end
 end
 
 return Config
