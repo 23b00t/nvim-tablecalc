@@ -33,7 +33,7 @@ function Core:read_buffer_visual()
   -- Get the start and end positions of the visual selection
   local start_pos = vim.api.nvim_buf_get_mark(0, '<')
   local end_pos = vim.api.nvim_buf_get_mark(0, '>')
-print(vim.inspect(end_pos))
+
   if start_pos[1] > end_pos[1] then
     error("Invalid visual selection")
   end
