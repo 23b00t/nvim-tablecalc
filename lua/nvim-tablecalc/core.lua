@@ -23,8 +23,6 @@ end
 function Core:read_buffer_normal()
   -- Get all lines from the buffer and concatenate them into a single string
   local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-  print(vim.inspect(table.concat(lines, '\n')))
-  error()
   return table.concat(lines, '\n')
 end
 
@@ -35,7 +33,7 @@ function Core:read_buffer_visual()
   -- Get the start and end positions of the visual selection
   local start_pos = vim.api.nvim_buf_get_mark(0, '<')
   local end_pos = vim.api.nvim_buf_get_mark(0, '>')
-
+print(vim.inspect(end_pos))
   if start_pos[1] > end_pos[1] then
     error("Invalid visual selection")
   end
