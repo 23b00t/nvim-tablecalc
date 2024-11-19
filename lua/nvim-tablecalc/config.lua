@@ -19,7 +19,6 @@ function Config.new()
   self.formula_begin = '{'
   self.formula_end = '}'
   self.table_name_marker = '#'
-  self.filetype = 'org'
   self.commands = {
     org = 'normal gggqG',
     -- TODO: Add more filetypes, e.g., md, csv
@@ -29,9 +28,8 @@ end
 
 --- Gets the command associated with the current filetype
 ---@return string The command for the current filetype
----@throws Error if the filetype is not valid in the config
 function Config:get_command()
-  return self.commands[self.filetype] or error("Invalid filetype in config")
+  return self.commands[vim.bo.filetype] or ''
 end
 
 --- Returns the command to autoformat the buffer based on the current filetype
