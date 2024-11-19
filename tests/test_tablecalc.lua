@@ -35,7 +35,7 @@ function TestTableCalc:test_setup()
       nvim_set_keymap = function(mode, lhs, rhs, opts)
         table.insert(mock_keymaps, { mode = mode, lhs = lhs, rhs = rhs, opts = opts })
       end,
-      -- nvim_create_user_command = function() end -- for later use 
+      -- nvim_create_user_command = function() end -- for later use
     }
   }
 
@@ -167,6 +167,3 @@ function TestTableCalc:test_get_utils()
   local utils = instance:get_utils()
   luaunit.assertNotNil(utils, "Utils object should be returned")
 end
-
--- Run the tests
-luaunit.run()

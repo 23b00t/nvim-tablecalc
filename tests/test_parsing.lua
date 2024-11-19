@@ -61,7 +61,7 @@ local expected_output = {
 }
 
 function TestParsing:tables_are_equal(t1, t2)
-  if t1 == t2 then return true end  -- Referenzgleichheit
+  if t1 == t2 then return true end -- Referenzgleichheit
 
   if type(t1) ~= "table" or type(t2) ~= "table" then
     return false
@@ -86,12 +86,10 @@ function TestParsing:test_parse_structured_table_with_complex_data()
   -- Instanz erstellen und den Mock verwenden
   local instance = TableCalc.get_instance()
 
-  -- Act: Aufruf der Methode mit der Input-Daten
+  -- Act: Aufruf der Methode mit Input-Daten
   local result = instance.parsing:parse_structured_table(input)
 
   -- Assert: Überprüfen, ob das Ergebnis mit der erwarteten Ausgabe übereinstimmt
-  luaunit.assertTrue(TestParsing:tables_are_equal(result, expected_output), "parse_structured_table should return the expected complex structured data")
+  luaunit.assertTrue(TestParsing:tables_are_equal(result, expected_output),
+    "parse_structured_table should return the expected complex structured data")
 end
-
--- Run the tests
-luaunit.run()
