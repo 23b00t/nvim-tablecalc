@@ -140,4 +140,57 @@ function Utils:sum()
   return sum
 end
 
+-- Utility function to parse a string into a Lua table
+---@param headers string
+---@return table
+function Utils:parse_headers(headers)
+    if type(headers) == "string" then
+        local parsed = {}
+        for header in headers:gmatch("[^,]+") do
+            table.insert(parsed, header:match("^%s*%{*(.-)%}*%s*$")) -- Trim whitespace
+        end
+        return parsed
+    end
+    return headers -- If already a table, return as-is
+end
+
+-- Function to insert a table with rows, columns, and optional headers
+---@param rows string
+---@param cols string
+---@param headers string
+-- INFO: Example usage
+-- insert_table(3, 3) -- Table with 3 rows, 3 columns, no headers
+-- insert_table(3, 3, {Name,Age,City}) -- Table with headers
+function Utils:insert_table(rows, cols, headers)
+  local tbl = {}
+
+  local headers_table = self:parse_headers(headers)
+  -- Check if headers are provided
+  local use_headers = type(headers_table) == "table" and #headers > 0
+
+  -- Create the header row (always empty if no headers are provided)
+  local header = { "" } -- Placeholder for the numbered column
+  for c = 1, cols do
+    table.insert(header, use_headers and (headers_table[c] or "") or " ")
+  end
+
+  table.insert(tbl, "| " .. table.concat(header, " | ") .. " |")
+  table.insert(tbl, "|" .. string.rep("-----|", cols + 1)) -- Separator row
+
+  -- Create data rows
+  for r = 1, rows do
+    local row = { tostring(r) } -- Numbered first column
+    for _ = 1, cols do
+      table.insert(row, " ")    -- Empty cells
+    end
+    table.insert(tbl, "| " .. table.concat(row, " | ") .. " |")
+  end
+
+  -- Insert the table into the current buffer
+  vim.api.nvim_put(tbl, "l", true, true)
+
+  -- Run autoformat command after writing to the buffer
+  vim.cmd(self.config:autoformat_buffer())
+end
+
 return Utils

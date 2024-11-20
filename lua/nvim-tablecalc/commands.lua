@@ -22,6 +22,16 @@ function Commands.setup()
   vim.api.nvim_set_keymap('v', '<leader>tc',
     ':lua require("nvim-tablecalc").get_instance():run_visual()<CR>',
     { noremap = true, silent = true })
+
+  vim.api.nvim_create_user_command('TableCreate', function(opts)
+    local args = opts.args
+    local rows, cols, headers = args:match("([^ ]+) ([^ ]+) ?([^ ]*)")
+    print(rows)
+    print(cols)
+    print(headers)
+
+    require("nvim-tablecalc").get_instance():get_utils():insert_table(rows, cols, headers)
+  end, { nargs = '*' })
 end
 
 return Commands
