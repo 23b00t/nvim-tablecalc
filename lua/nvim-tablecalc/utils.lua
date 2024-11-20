@@ -59,7 +59,7 @@ function Utils:evaluate_formula(formula)
   -- Resolve references in the formula to their actual values
   local expression = self:resolve_recursive(formula)
   -- Load and execute the expression in the Lua environment if it is a math expression
-  if expression:match("[^%s0-9%+%*%-%/%^]+") then
+  if expression:match("[^%.%s0-9%+%*%-%/%^]+") then
     print("Only math is allowed, you expression is: ", expression)
   else
     local func, err = load("return " .. expression)
@@ -83,7 +83,7 @@ function Utils:resolve_recursive(expression)
     return self:resolve_recursive(expression)
   end
   -- clear intermediat results (: %d+) from the string
-  expression = expression:gsub(":%s*%d+", '')
+  expression = expression:gsub(":%s*[%d%.]+", '')
   return expression
 end
 
