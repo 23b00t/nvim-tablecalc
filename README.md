@@ -18,7 +18,6 @@
     - ~~Set table_name_marker by filetype~~
     - ~~avoid recursiv self calls~~
     - ~~Table creator~~
-    - Make table creator more robust and flexible
 - Robust error handling
 - refactor
 
