@@ -74,10 +74,16 @@ end
 ---@param expression string
 ---@return string expression
 function Utils:resolve_recursive(expression)
-  local match_expr = "%" .. self.config.formula_begin .. "([%w%d%.%s%+%*%-%/]+)%" .. self.config.formula_end
+  local match_expr = "%" .. self.config.formula_begin .. "([%w%d%.%s%+%*%-%/%(%)%,]+)%" .. self.config.formula_end
   if expression:match(match_expr) then
     expression = expression:gsub(match_expr, function(match)
-      return self:resolve_expression(match)
+      print(match)
+      if match:match("sum") then
+        self:resolve_sum_expression(match)
+        return self:sum()
+      else
+        return self:resolve_expression(match)
+      end
     end)
     return self:resolve_recursive(expression)
   end

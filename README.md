@@ -16,7 +16,7 @@
     - ~~Calculate correclty with the results of formulas~~
     - Styling: Formulas should look like comments, results maybe in a new line
     - Tablename and maybe row numbers should be optional
-    - Set delimeters by filetype
+    - ~~Set table_name_marker by filetype~~
     - Table creator (extra plugin)
     - Transform tables from well known formats (extra program, use Ruby, very optional)
 - Robust error handling
