@@ -9,11 +9,11 @@
 
 ## TODOs
 - Improve tests (test .md and .csv functioniliy too)
-- Fix bug: Not every lua code is evaluated without erros (test print)
+- ~~only eval math expressions~~
 - Add functioniliy:
     - It accepts ranges (Table.column.2-5,8)
     - Analoge to sum, multiply
-    - Calculate correclty with the results of formulas
+    - ~~Calculate correclty with the results of formulas~~
     - Styling: Formulas should look like comments, results maybe in a new line
     - Tablename and maybe row numbers should be optional
     - Set delimeters by filetype
