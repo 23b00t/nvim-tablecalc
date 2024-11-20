@@ -27,16 +27,23 @@ end
 function Utils:process_data(table_data)
   self.rows = table_data -- Use the table data for processing
   -- Iterate through all tables and their columns
-  for _, table_name in pairs(table_data) do
-    for column, values in pairs(table_name) do
+  for table_name, table_content in pairs(table_data) do
+    for column, values in pairs(table_content) do
       for i, cell in ipairs(values) do
+        -- print(vim.inspect(table_name))
+        -- error()
         -- Detect if the cell contains a formula
         local match_expr = "^%" .. self.config.formula_begin .. "(.+)%" .. self.config.formula_end
         local formula = cell:match(match_expr)
         if formula then
-          -- Evaluate the formula and append the result to the cell
-          local result = self:evaluate_formula(cell)
-          table_name[column][i] = self.config.formula_begin .. formula .. self.config.formula_end .. ": " .. result
+          -- Avoid recursive self call by checking if current cell is part of the formula
+          if formula:match(table_name .. '.' .. column .. '.' .. i) then
+            error('No recurisve self calls!!!!!')
+          else
+            -- Evaluate the formula and append the result to the cell
+            local result = self:evaluate_formula(cell)
+            table_content[column][i] = self.config.formula_begin .. formula .. self.config.formula_end .. ": " .. result
+          end
         end
       end
     end
