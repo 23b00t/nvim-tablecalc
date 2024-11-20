@@ -4,7 +4,7 @@
 ---@field delimiter string The character used as a delimiter in tables
 ---@field formula_begin string The character marking the beginning of a formula
 ---@field formula_end string The character marking the end of a formula
----@field table_name_marker string The character used to mark table names
+---@field table_name_marker table The character used to mark table names
 ---@field filetype string The current file type (default is 'org')
 ---@field user_command string Finishing command set by user
 ---@field commands table A table mapping file types to commands
@@ -19,7 +19,10 @@ function Config.new()
   self.delimiter = '|'
   self.formula_begin = '{'
   self.formula_end = '}'
-  self.table_name_marker = '#'
+  self.table_name_marker = {
+    org = '#',
+    markdown = '%[%/%/%]: #',
+  }
   self.user_command = nil
   self.commands = {
     org = 'normal gggqG',
@@ -42,6 +45,11 @@ end
 ---@return string The autoformat command for the buffer
 function Config:autoformat_buffer()
   return self:get_command()
+end
+
+---@return string table_name_marker
+function Config:get_table_name_marker()
+  return self.table_name_marker[vim.bo.filetype] or '#'
 end
 
 ---@param user_config table
