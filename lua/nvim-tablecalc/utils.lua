@@ -71,25 +71,20 @@ function Utils:resolve_recursive(expression)
   local match_expr = "%" .. self.config.formula_begin .. "([%w%d%.%s%+%*%-%/%(%)%,]+)%" .. self.config.formula_end
   if expression:match(match_expr) then
     expression = expression:gsub(match_expr, function(match)
-      if match:match("sum") then
-        self:resolve_sum_expression(match)
-        return self:sum()
-      else
-        return self:resolve_expression(match)
-      end
+      return self:resolve_expression(match)
     end)
     return self:resolve_recursive(expression)
   end
-  -- clear intermediat results from the string
+  -- clear intermediat results (: %d+) from the string
   expression = expression:gsub(":%s*%d+", '')
   return expression
 end
 
 --- Resolves references in a formula to their corresponding values
 ---@param expression string The expression containing references to be resolved
-function Utils:resolve_sum_expression(expression)
+function Utils:resolve_expression(expression)
   -- Resolve "sum" expressions
-  expression:gsub("sum%((%w+),%s*(%w+),?%s*(%d*)%)", function(table_name, column_name, row_index)
+  expression = expression:gsub("sum%((%w+),%s*(%w+),?%s*(%d*)%)", function(table_name, column_name, row_index)
     if row_index == '' then
       self.data = self.rows[table_name][column_name]
     elseif column_name == 'nil' then
@@ -101,13 +96,9 @@ function Utils:resolve_sum_expression(expression)
         end
       end
     end
+    return self:sum()
   end)
-end
 
---- Resolves references in a formula to their corresponding values
----@param expression string The expression containing references to be resolved
----@return string The resolved expression with actual values
-function Utils:resolve_expression(expression)
   -- Replace references like Table.Column.Row with actual values
   expression = expression:gsub("(%w+).(%w+).(%d+)", function(table_name, column_name, row_index)
     local table_data = self.rows[table_name] -- Get the table data by name
