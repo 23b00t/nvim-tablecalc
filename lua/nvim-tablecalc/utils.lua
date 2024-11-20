@@ -169,7 +169,7 @@ function Utils:insert_table(rows, cols, headers)
   local use_headers = type(headers_table) == "table" and #headers > 0
 
   -- Create the header row (always empty if no headers are provided)
-  local header = { "" } -- Placeholder for the numbered column
+  local header = { "#" } -- Placeholder for the numbered column
   for c = 1, cols do
     table.insert(header, use_headers and (headers_table[c] or "") or " ")
   end
@@ -196,10 +196,10 @@ end
 -- Define a function to highlight '{}' and their contents
 function Utils:highlight_curly_braces()
   -- Define the highlighting group
-  vim.api.nvim_set_hl(0, "GrayCurly", { fg = "#9900ef" }) -- Adjust the color as needed
+  vim.api.nvim_set_hl(0, "PurpleCurly", { fg = "#9900ef" }) -- Adjust the color as needed
 
   -- Add the match for '{}' and their contents
-  vim.fn.matchadd("GrayCurly", "{.*}")
+  vim.fn.matchadd("PurpleCurly", "{.*}")
 end
 
 return Utils
