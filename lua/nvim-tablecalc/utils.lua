@@ -49,7 +49,7 @@ end
 ---@param formula string The formula to be evaluated
 ---@return any The result of the evaluated formula
 function Utils:evaluate_formula(formula)
-  if formula:match("sum") then
+  if formula:match("^%s*sum") then
     self:resolve_sum_expression(formula)
     return self:sum() -- If the formula contains "sum", call the sum function
   end
@@ -57,12 +57,16 @@ function Utils:evaluate_formula(formula)
   local expression = self:resolve_expression(formula)
   -- If expression contains still formula markers, recursivly resolve it
   expression = self:resolve_recursive(expression)
-  -- Load and execute the expression in the Lua environment
-  local func, err = load("return " .. expression)
-  if func then
-    return func() -- Execute and return the result
+  -- Load and execute the expression in the Lua environment if it is a math expression
+  if expression:match("[^%s0-9%+%*%-%/%^]+") then
+    print("Only math is allowed, you expression is: ", expression)
   else
-    print("Error in evaluating formula:", err)
+    local func, err = load("return " .. expression)
+    if func then
+      return func() -- Execute and return the result
+    else
+      print("Error in evaluating formula:", err)
+    end
   end
 end
 
@@ -73,7 +77,7 @@ function Utils:resolve_recursive(expression)
   local match_expr = "%" .. self.config.formula_begin .. "([%w%d%.%s%+%*%-%/]+)%" .. self.config.formula_end
   if expression:match(match_expr) then
     expression = expression:gsub(match_expr, function(match)
-      return self:resolve_expression(match) or ""
+      return self:resolve_expression(match)
     end)
     return self:resolve_recursive(expression)
   end
