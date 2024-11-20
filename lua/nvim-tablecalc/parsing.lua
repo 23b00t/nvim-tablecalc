@@ -29,13 +29,12 @@ end
 function Parsing:parse_structured_table(content)
   local current_table_name = "" -- Variable to track the current table name
   local headers = {}            -- Array to store the column headers of the current table
-
   -- Split content into lines and process each line
   for line in content:gmatch("[^\r\n]+") do
     -- Detect table names, marked by a line starting with `#`
-    if line:match("^" .. self.config.table_name_marker) then
+    if line:match("^" .. self.config:get_table_name_marker()) then
       -- Extract the table name (last word after the `#`)
-      current_table_name = line:match(self.config.table_name_marker .. "%s*.-%s(%w+)%s*$")
+      current_table_name = line:match(self.config:get_table_name_marker() .. "%s*.-%s(%w+)%s*$")
       self.rows[current_table_name] = {} -- Initialize a table for the extracted table name
       headers = {}                       -- Reset headers for the new table
     elseif line:match(self.config.delimiter) then
