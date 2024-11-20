@@ -3,6 +3,7 @@
 ---@class Core
 ---@field table_calc_instance TableCalc Instance of the TableCalc class
 ---@field config Config Configuration object for TableCalc
+---@field utils Utils
 local Core = {}
 Core.__index = Core
 
@@ -15,6 +16,7 @@ function Core.new(table_calc_instance)
   self.table_calc_instance = table_calc_instance
   -- Get the configuration from the TableCalc instance
   self.config = table_calc_instance:get_config()
+  self.utils = table_calc_instance:get_utils()
   return self
 end
 
@@ -53,7 +55,7 @@ function Core:write_to_buffer(table_data)
       for _, cell_content in pairs(rows) do
         -- Match the formula and result from the cell content
         local formula, result = cell_content:match("^(%" ..
-        self.config.formula_begin .. ".-%" .. self.config.formula_end .. "): (.+)$")
+          self.config.formula_begin .. ".-%" .. self.config.formula_end .. "): (.+)$")
         if formula and result then
           -- Iterate through all lines in the buffer to find and update the matching line
           for line_number = 1, vim.api.nvim_buf_line_count(0) do
@@ -72,6 +74,7 @@ function Core:write_to_buffer(table_data)
   end
   -- Run autoformat command after writing to the buffer
   vim.cmd(self.config:autoformat_buffer())
+  self.utils:highlight_curly_braces()
 end
 
 return Core

@@ -13,7 +13,7 @@
 - Add functioniliy:
     - Analoge to sum, multiply
     - ~~Calculate correclty with the results of formulas~~
-    - Styling: Formulas should look like comments, results maybe in a new line
+    - Styling: ~~Formulas should have a different color~~, results maybe in a new line
     - Tablename and maybe row numbers should be optional
     - ~~Set table_name_marker by filetype~~
     - ~~avoid recursiv self calls~~

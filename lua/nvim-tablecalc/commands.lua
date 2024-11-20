@@ -29,6 +29,14 @@ function Commands.setup()
 
     require("nvim-tablecalc").get_instance():get_utils():insert_table(rows, cols, headers)
   end, { nargs = '*' })
+
+  -- Create autocommands for both buffer opening and text changes
+  vim.api.nvim_create_autocmd({ "BufEnter", "TextChanged", "InsertLeave" }, {
+    pattern = "*", -- Apply to all file types
+    callback = function()
+      require('nvim-tablecalc').get_instance():get_utils():highlight_curly_braces()
+    end,
+  })
 end
 
 return Commands
