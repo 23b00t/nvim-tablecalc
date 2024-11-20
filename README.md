@@ -17,6 +17,7 @@
     - Styling: Formulas should look like comments, results maybe in a new line
     - Tablename and maybe row numbers should be optional
     - ~~Set table_name_marker by filetype~~
+    - avoid recursiv self calls
     - Table creator (extra plugin)
     - Transform tables from well known formats (extra program, use Ruby, very optional)
 - Robust error handling
