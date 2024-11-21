@@ -68,7 +68,6 @@ function Core:write_to_buffer(table_data)
               local updated_line = line_content:sub(1, col_end) ..
               line_content:sub(col_end + 1):gsub(":?%s*[%d%.]*", ": " .. result, 1)
               vim.api.nvim_buf_set_lines(0, line_number - 1, line_number, false, { updated_line })
-              break
             end
           end
         end

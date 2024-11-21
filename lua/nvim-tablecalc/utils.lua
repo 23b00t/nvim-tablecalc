@@ -30,8 +30,6 @@ function Utils:process_data(table_data)
   for table_name, table_content in pairs(table_data) do
     for column, values in pairs(table_content) do
       for i, cell in ipairs(values) do
-        -- print(vim.inspect(table_name))
-        -- error()
         -- Detect if the cell contains a formula
         local match_expr = "^%" .. self.config.formula_begin .. "(.+)%" .. self.config.formula_end
         local formula = cell:match(match_expr)
