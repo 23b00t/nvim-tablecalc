@@ -58,18 +58,6 @@ function TableCalc:run_normal()
   self.core:write_to_buffer(modified_data)
 end
 
---- Method to run TableCalc in visual mode
-function TableCalc:run_visual()
-  -- Read the buffer content in visual mode
-  local content = self.core:read_buffer_visual()
-  -- Parse the structured table from the content
-  local tables = self.parsing:parse_structured_table(content)
-  -- Process the parsed data
-  local modified_data = self.utils:process_data(tables)
-  -- Write the processed data back to the buffer
-  self.core:write_to_buffer(modified_data)
-end
-
 --- Method to get the configuration object
 ---@return Config The configuration object
 function TableCalc:get_config()

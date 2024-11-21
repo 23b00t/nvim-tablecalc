@@ -30,25 +30,6 @@ function Core:read_buffer_normal()
   return self.buffer
 end
 
---- Reads the selected buffer in visual mode
----@return string The content of the selected lines in visual mode
----@throws error If the visual selection is invalid
-function Core:read_buffer_visual()
-  -- Get the start and end positions of the visual selection
-  local start_pos = vim.api.nvim_buf_get_mark(0, '<')
-  local end_pos = vim.api.nvim_buf_get_mark(0, '>')
-
-  if start_pos[1] > end_pos[1] then
-    error("Invalid visual selection")
-  end
-
-  -- Get the lines within the visual selection and concatenate them into a string
-  local lines = vim.api.nvim_buf_get_lines(0, start_pos[1] - 1, end_pos[1], false)
-  self.buffer = table.concat(lines, '\n')
-
-  return self.buffer
-end
-
 --- Writes the modified table data back to the buffer
 ---@param result_table table The modified table data to be written back to the buffer
 function Core:write_to_buffer(result_table)
