@@ -25,7 +25,9 @@ end
 function Core:read_buffer_normal()
   -- Get all lines from the buffer and concatenate them into a single string
   local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-  return table.concat(lines, '\n')
+  self.buffer = table.concat(lines, '\n')
+
+  return self.buffer
 end
 
 --- Reads the selected buffer in visual mode
@@ -42,12 +44,13 @@ function Core:read_buffer_visual()
 
   -- Get the lines within the visual selection and concatenate them into a string
   local lines = vim.api.nvim_buf_get_lines(0, start_pos[1] - 1, end_pos[1], false)
+  self.buffer = table.concat(lines, '\n')
 
-  return table.concat(lines, '\n')
+  return self.buffer
 end
 
 --- Writes the modified table data back to the buffer
----@param table_data any The modified table data to be written back to the buffer
+---@param table_data table The modified table data to be written back to the buffer
 function Core:write_to_buffer(table_data)
   -- Iterate through each column, row, and cell content in the table data
   for _, columns in pairs(table_data) do
@@ -57,23 +60,19 @@ function Core:write_to_buffer(table_data)
         local formula, result = cell_content:match("^(%" ..
           self.config.formula_begin .. ".-%" .. self.config.formula_end .. "): (.+)$")
         if formula and result then
-          -- Iterate through all lines in the buffer to find and update the matching line
-          for line_number = 1, vim.api.nvim_buf_line_count(0) do
-            local line_content = vim.api.nvim_buf_get_lines(0, line_number - 1, line_number, false)[1]
-            -- string:find("match_text"[, start_pos, match_plain_text?] (no regex, default false))
-            local col_start, col_end = line_content:find(formula, 1, true)
-            if col_start then
-              -- Cut line from first char till last char of the match.  Cut from the next char till default (end of line)
-              -- and replace the first occurence of pattern ":?%s*[%d%.]*", e.g. `: 3.8` or just '', with : result 
-              local updated_line = line_content:sub(1, col_end) ..
-              line_content:sub(col_end + 1):gsub(":?%s*[%d%.]*", ": " .. result, 1)
-              vim.api.nvim_buf_set_lines(0, line_number - 1, line_number, false, { updated_line })
-            end
-          end
+          local escaped_formula = vim.pesc(formula)
+          self.buffer = self.buffer:gsub(
+            escaped_formula .. ":?%s*[%d%.]*",
+            escaped_formula .. ': ' .. result
+          )
         end
       end
     end
   end
+  -- Split self.buffer into lines
+  local lines = vim.split(self.buffer, '\n', { plain = true })
+  -- Replace the entire buffer content with the new lines
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
   -- Run autoformat command after writing to the buffer
   vim.cmd(self.config:autoformat_buffer())
 end
