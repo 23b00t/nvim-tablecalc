@@ -144,14 +144,14 @@ end
 ---@param headers string
 ---@return table
 function Utils:parse_headers(headers)
-    if type(headers) == "string" then
-        local parsed = {}
-        for header in headers:gmatch("[^,]+") do
-            table.insert(parsed, header:match("^%s*%{*(.-)%}*%s*$")) -- Trim whitespace
-        end
-        return parsed
+  if type(headers) == "string" then
+    local parsed = {}
+    for header in headers:gmatch("[^,]+") do
+      table.insert(parsed, header:match("^%s*%{*(.-)%}*%s*$")) -- Trim whitespace
     end
-    return headers -- If already a table, return as-is
+    return parsed
+  end
+  return headers -- If already a table, return as-is
 end
 
 -- Function to insert a table with rows, columns, and optional headers
@@ -193,13 +193,19 @@ function Utils:insert_table(cols, rows, headers)
   vim.cmd(self.config:autoformat_buffer())
 end
 
--- Define a function to highlight '{}' and their contents
+-- Highlight formula
 function Utils:highlight_curly_braces()
+  self.match_id = nil
   -- Define the highlighting group
-  vim.api.nvim_set_hl(0, "PurpleCurly", { fg = "#b279d2" }) -- Adjust the color as needed
+  vim.api.nvim_set_hl(0, "PurpleCurly", { fg = "#b279d2" })
 
   -- Add the match for formula markers and their contents, not match pipe to avoid matching the closing tag of the next cell
-  vim.fn.matchadd("PurpleCurly", self.config.formula_begin .. "[^|]*" .. self.config.formula_end)
+  self.match_id = vim.fn.matchadd("PurpleCurly", self.config.formula_begin .. "[^|]*" .. self.config.formula_end)
+end
+
+-- Remove the custom highlighting
+function Utils:remove_highlight()
+  vim.fn.matchdelete(self.match_id)
 end
 
 return Utils

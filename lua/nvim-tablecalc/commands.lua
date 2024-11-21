@@ -38,6 +38,14 @@ function Commands.setup()
       require('nvim-tablecalc').get_instance():get_utils():highlight_curly_braces()
     end,
   })
+
+  -- Create autocommand to remove highlighting by leaving the buffer
+  vim.api.nvim_create_autocmd({ "BufLeave" }, {
+    pattern = { "*.org", "*.md" },
+    callback = function()
+      require('nvim-tablecalc').get_instance():get_utils():remove_highlight()
+    end,
+  })
 end
 
 return Commands
