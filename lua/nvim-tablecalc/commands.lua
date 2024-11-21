@@ -25,7 +25,7 @@ function Commands.setup()
 
   vim.api.nvim_create_user_command('TableCreate', function(opts)
     local args = opts.args
-    local rows, cols, headers = args:match("(%S+)%s(%S+)%s*(.*)")
+    local rows, cols, headers = args:match("(%d+)%s+(%d+)%s*(.*)")
 
     require("nvim-tablecalc").get_instance():get_utils():insert_table(rows, cols, headers)
   end, { nargs = '*' })

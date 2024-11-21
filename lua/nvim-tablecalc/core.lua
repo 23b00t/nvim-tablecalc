@@ -60,10 +60,13 @@ function Core:write_to_buffer(table_data)
           -- Iterate through all lines in the buffer to find and update the matching line
           for line_number = 1, vim.api.nvim_buf_line_count(0) do
             local line_content = vim.api.nvim_buf_get_lines(0, line_number - 1, line_number, false)[1]
+            -- string:find("match_text"[, start_pos, match_plain_text?] (no regex, default false))
             local col_start, col_end = line_content:find(formula, 1, true)
             if col_start then
-              local updated_line = line_content:sub(1, col_end) .. ": " .. result
-              -- Update the line with the new result
+              -- Cut line from first char till last char of the match.  Cut from the next char till default (end of line)
+              -- and replace the first occurence of pattern ":?%s*[%d%.]*", e.g. `: 3.8` or just '', with : result 
+              local updated_line = line_content:sub(1, col_end) ..
+              line_content:sub(col_end + 1):gsub(":?%s*[%d%.]*", ": " .. result, 1)
               vim.api.nvim_buf_set_lines(0, line_number - 1, line_number, false, { updated_line })
               break
             end
@@ -74,7 +77,6 @@ function Core:write_to_buffer(table_data)
   end
   -- Run autoformat command after writing to the buffer
   vim.cmd(self.config:autoformat_buffer())
-  self.utils:highlight_curly_braces()
 end
 
 return Core
