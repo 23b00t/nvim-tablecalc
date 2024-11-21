@@ -8,7 +8,10 @@
 - Work in progress
 
 ## TODOs
+- ~~FixBug: Formulas in same row bug: see asoc_table2.org~~
+- Test reserved words as table/ column name (sum)
 - Improve tests (test .md and .csv functioniliy too)
+- Fix that highlight autocmd is globaly active
 - ~~only eval math expressions~~
 - Add functioniliy:
     - Analoge to sum, multiply

@@ -159,9 +159,9 @@ end
 ---@param cols string
 ---@param headers string
 -- INFO: Example usage
--- insert_table(3, 3) -- Table with 3 rows, 3 columns, no headers
--- insert_table(3, 3, {Name,Age,City}) -- Table with headers
-function Utils:insert_table(rows, cols, headers)
+-- insert_table(3, 5) -- Table with 3 columns, 5 rows, no headers
+-- insert_table(3, 3, Name, Age,City) -- Table with headers
+function Utils:insert_table(cols, rows, headers)
   local tbl = {}
 
   local headers_table = self:parse_headers(headers)
@@ -196,10 +196,10 @@ end
 -- Define a function to highlight '{}' and their contents
 function Utils:highlight_curly_braces()
   -- Define the highlighting group
-  vim.api.nvim_set_hl(0, "PurpleCurly", { fg = "#9900ef" }) -- Adjust the color as needed
+  vim.api.nvim_set_hl(0, "PurpleCurly", { fg = "#b279d2" }) -- Adjust the color as needed
 
-  -- Add the match for '{}' and their contents
-  vim.fn.matchadd("PurpleCurly", "{.*}")
+  -- Add the match for formula markers and their contents, not match pipe to avoid matching the closing tag of the next cell
+  vim.fn.matchadd("PurpleCurly", self.config.formula_begin .. "[^|]*" .. self.config.formula_end)
 end
 
 return Utils
