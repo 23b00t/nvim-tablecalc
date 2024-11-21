@@ -25,9 +25,9 @@ function Commands.setup()
 
   vim.api.nvim_create_user_command('TableCreate', function(opts)
     local args = opts.args
-    local rows, cols, headers = args:match("(%d+)%s+(%d+)%s*(.*)")
+    local cols, rows, headers = args:match("(%d+)%s+(%d+)%s*(.*)")
 
-    require("nvim-tablecalc").get_instance():get_utils():insert_table(rows, cols, headers)
+    require("nvim-tablecalc").get_instance():get_utils():insert_table(cols, rows, headers)
   end, { nargs = '*' })
 
   -- Create autocommands for both buffer opening and text changes

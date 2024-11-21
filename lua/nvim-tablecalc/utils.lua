@@ -159,9 +159,9 @@ end
 ---@param cols string
 ---@param headers string
 -- INFO: Example usage
--- insert_table(3, 3) -- Table with 3 rows, 3 columns, no headers
--- insert_table(3, 3, {Name,Age,City}) -- Table with headers
-function Utils:insert_table(rows, cols, headers)
+-- insert_table(3, 5) -- Table with 3 columns, 5 rows, no headers
+-- insert_table(3, 3, Name, Age,City) -- Table with headers
+function Utils:insert_table(cols, rows, headers)
   local tbl = {}
 
   local headers_table = self:parse_headers(headers)
