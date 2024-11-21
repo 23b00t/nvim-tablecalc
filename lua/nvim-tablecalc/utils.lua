@@ -25,6 +25,7 @@ end
 ---@param table_data table The table containing data to be processed
 ---@return table The updated table with formula results appended to the cells
 function Utils:process_data(table_data)
+  local results = {}
   self.rows = table_data -- Use the table data for processing
   -- Iterate through all tables and their columns
   for table_name, table_content in pairs(table_data) do
@@ -40,14 +41,14 @@ function Utils:process_data(table_data)
           else
             -- Evaluate the formula and append the result to the cell
             local result = self:evaluate_formula(cell)
-            table_content[column][i] = self.config.formula_begin .. formula .. self.config.formula_end .. ": " .. result
+            table.insert(results, self.config.formula_begin .. formula .. self.config.formula_end .. ": " .. result)
           end
         end
       end
     end
   end
-  -- Return the updated table data with results
-  return self.rows
+  -- Return a table only with formula: result
+  return results
 end
 
 --- Evaluates a mathematical formula

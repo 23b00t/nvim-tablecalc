@@ -25,7 +25,7 @@ function Config.new()
   }
   self.user_command = nil
   self.commands = {
-    org = 'normal gggqG',
+    org = 'normal! gggqG',
     -- TODO: Add more filetypes, e.g., md, csv
   }
   return self

@@ -50,23 +50,18 @@ function Core:read_buffer_visual()
 end
 
 --- Writes the modified table data back to the buffer
----@param table_data table The modified table data to be written back to the buffer
-function Core:write_to_buffer(table_data)
-  -- Iterate through each column, row, and cell content in the table data
-  for _, columns in pairs(table_data) do
-    for _, rows in pairs(columns) do
-      for _, cell_content in pairs(rows) do
-        -- Match the formula and result from the cell content
-        local formula, result = cell_content:match("^(%" ..
-          self.config.formula_begin .. ".-%" .. self.config.formula_end .. "): (.+)$")
-        if formula and result then
-          local escaped_formula = vim.pesc(formula)
-          self.buffer = self.buffer:gsub(
-            escaped_formula .. ":?%s*[%d%.]*",
-            escaped_formula .. ': ' .. result
-          )
-        end
-      end
+---@param result_table table The modified table data to be written back to the buffer
+function Core:write_to_buffer(result_table)
+  for _, cell in pairs(result_table) do
+    -- Match the formula and result from the cell content
+    local formula, result = cell:match("^(%" ..
+      self.config.formula_begin .. ".-%" .. self.config.formula_end .. "): (.+)$")
+    if formula and result then
+      local escaped_formula = vim.pesc(formula)
+      self.buffer = self.buffer:gsub(
+        escaped_formula .. ":?%s*[%d%.]*",
+        escaped_formula .. ': ' .. result
+      )
     end
   end
   -- Split self.buffer into lines
