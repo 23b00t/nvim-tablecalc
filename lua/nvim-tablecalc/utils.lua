@@ -204,7 +204,17 @@ end
 
 -- Remove the custom highlighting
 function Utils:remove_highlight()
-  vim.fn.matchdelete(self.match_id)
+  if self:match_exists() then vim.fn.matchdelete(self.match_id) end
+end
+
+function Utils:match_exists()
+  local matches = vim.fn.getmatches() -- Get all active matches
+  for _, match in ipairs(matches) do
+    if match.id == self.match_id then
+      return true
+    end
+  end
+  return false
 end
 
 return Utils
