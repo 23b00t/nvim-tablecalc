@@ -83,6 +83,8 @@ function TestParsing:tables_are_equal(t1, t2)
 end
 
 function TestParsing:test_parse_structured_table_with_complex_data()
+  -- Save the original _G.vim value
+  local original_vim = _G.vim
   -- Mock filetype to not get nil in Config:get_table_name_marker()
   _G.vim = {
     bo = { filetype = "org" }
@@ -97,4 +99,7 @@ function TestParsing:test_parse_structured_table_with_complex_data()
   -- Assert: Überprüfen, ob das Ergebnis mit der erwarteten Ausgabe übereinstimmt
   luaunit.assertTrue(TestParsing:tables_are_equal(result, expected_output),
     "parse_structured_table should return the expected complex structured data")
+
+  -- Restore the original _G.vim value after the test
+  _G.vim = original_vim
 end
