@@ -64,18 +64,6 @@ function TableCalc:get_config()
   return self.config
 end
 
---- Method to get the parsing object
----@return Parsing The parsing object
-function TableCalc:get_parsing()
-  return self.parsing
-end
-
---- Method to get the core functionality object
----@return Core The core object
-function TableCalc:get_core()
-  return self.core
-end
-
 --- Method to get the utility functions object
 ---@return Utils The utilities object
 function TableCalc:get_utils()
