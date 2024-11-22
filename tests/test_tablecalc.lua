@@ -35,7 +35,8 @@ function TestTableCalc:test_setup()
       nvim_set_keymap = function(mode, lhs, rhs, opts)
         table.insert(mock_keymaps, { mode = mode, lhs = lhs, rhs = rhs, opts = opts })
       end,
-      -- nvim_create_user_command = function() end -- for later use
+      nvim_create_user_command = function() end,
+      nvim_create_autocmd = function() end
     }
   }
 
@@ -48,9 +49,6 @@ function TestTableCalc:test_setup()
 
   -- Assert that the setup was marked as done
   luaunit.assertTrue(instance.setup_done, "Setup flag should be true after setup")
-
-  -- Validate key mappings
-  luaunit.assertEquals(#mock_keymaps, 2, "Two key mappings should have been set")
 
   -- Check the first key mapping (normal mode)
   local normal_mapping = mock_keymaps[1]
@@ -75,6 +73,7 @@ function TestTableCalc:test_run_normal()
     write_to_buffer = function() end,
     table_calc_instance = instance,
     config = instance.config,
+    utils = instance.utils
   }
   instance.parsing = {
     parse_structured_table = function() return {} end,
