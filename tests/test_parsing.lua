@@ -83,6 +83,11 @@ function TestParsing:tables_are_equal(t1, t2)
 end
 
 function TestParsing:test_parse_structured_table_with_complex_data()
+  -- Mock filetype to not get nil in Config:get_table_name_marker()
+  _G.vim = {
+    bo = { filetype = "org" }
+  }
+
   -- Instanz erstellen und den Mock verwenden
   local instance = TableCalc.get_instance()
 
