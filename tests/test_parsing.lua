@@ -103,3 +103,34 @@ function TestParsing:test_parse_structured_table_with_complex_data()
   -- Restore the original _G.vim value after the test
   _G.vim = original_vim
 end
+
+function TestParsing:test_parse_headers()
+  -- Instanz erstellen und den Mock verwenden
+  local instance = TableCalc.get_instance()
+
+  -- Act: Aufruf der Methode mit Input-Daten
+  local result = instance.parsing:parse_headers("Name n, Price p,fnord")
+
+  -- Assert: Überprüfen, ob das Ergebnis mit der erwarteten Ausgabe übereinstimmt
+  luaunit.assertEquals(result, {"Name n", "Price p", "fnord"},
+    "parse_headers should return the expected table")
+end
+
+function TestParsing:test_process_data()
+  -- Instanz erstellen und den Mock verwenden
+  local instance = TableCalc.get_instance()
+
+  -- Act: Aufruf der Methode mit Input-Daten
+  local result = instance.parsing:process_data(expected_output)
+  local expected = {
+       "{sum(S, nil, 2)}: 28",
+       "{ 3 * 3}: 9",
+       "{sum(t, N)}: 33",
+       "{S.c.3 + S.c.2}: 28",
+       "{ 3 + 5}: 8"
+  }
+
+  -- Assert: Überprüfen, ob das Ergebnis mit der erwarteten Ausgabe übereinstimmt
+  luaunit.assertEquals(result, expected,
+    "parse_headers should return the expected table")
+end
