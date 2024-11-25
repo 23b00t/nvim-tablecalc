@@ -171,7 +171,8 @@ function Parsing:resolve_expression(expression)
     local table_data = self.rows[table_name] -- Get the table data by name
     if table_data and table_data[column_name] then
       local row_value = table_data[column_name][tonumber(row_index)]
-      return tostring(row_value) -- Convert the value to a string for Lua expressions
+      -- if the value is not empty return it as string else return '0' (to handle empty fields as 0)
+      return row_value ~= '' and tostring(row_value) or '0' -- Convert the value to a string for Lua expressions
     else
       error("Invalid reference: ")
     end
