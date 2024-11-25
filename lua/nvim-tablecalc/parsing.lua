@@ -65,4 +65,117 @@ function Parsing:parse_structured_table(content)
   return self.rows
 end
 
+-- Utility function to parse a string into a Lua table
+---@param headers string
+---@return table
+function Parsing:parse_headers(headers)
+  if type(headers) == "string" then
+    local parsed = {}
+    for header in headers:gmatch("[^,]+") do
+      table.insert(parsed, header:match("^%s*%{*(.-)%}*%s*$")) -- Trim whitespace
+    end
+    return parsed
+  end
+  return headers -- If already a table, return as-is
+end
+
+--- Extracts and evaluates formulas from a table and appends the result
+---@param table_data table The table containing data to be processed
+---@return table The updated table with formula results appended to the cells
+function Parsing:process_data(table_data)
+  local results = {}
+  self.rows = table_data -- Use the table data for processing
+  -- Iterate through all tables and their columns
+  for table_name, table_content in pairs(table_data) do
+    for column, values in pairs(table_content) do
+      for i, cell in ipairs(values) do
+        -- Detect if the cell contains a formula
+        local match_expr = "^%" .. self.config.formula_begin .. "(.+)%" .. self.config.formula_end
+        local formula = cell:match(match_expr)
+        if formula then
+          -- Avoid recursive self call by checking if current cell is part of the formula
+          if formula:match(table_name .. '.' .. column .. '.' .. i) then
+            error('No recurisve self calls!!!!!')
+          else
+            -- Evaluate the formula and append the result to the cell
+            local result = self:evaluate_formula(cell)
+            table.insert(results, self.config.formula_begin .. formula .. self.config.formula_end .. ": " .. result)
+          end
+        end
+      end
+    end
+  end
+  -- Return a table only with formula: result
+  return results
+end
+
+--- Evaluates a mathematical formula
+---@param formula string The formula to be evaluated
+---@return any The result of the evaluated formula
+function Parsing:evaluate_formula(formula)
+  -- Resolve references in the formula to their actual values
+  local expression = self:resolve_recursive(formula)
+  -- Load and execute the expression in the Lua environment if it is a math expression
+  if expression:match("[^%.%s0-9%+%*%-%/%^]+") then
+    print("Only math is allowed, you expression is: ", expression)
+  else
+    local func, err = load("return " .. expression)
+    if func then
+      return func() -- Execute and return the result
+    else
+      print("Error in evaluating formula:", err)
+    end
+  end
+end
+
+--- Resolves expressions recursivly until no more formulas are found
+---@param expression string
+---@return string expression
+function Parsing:resolve_recursive(expression)
+  local match_expr = "%" .. self.config.formula_begin .. "([%w%d%.%s%+%*%-%/%(%)%,]+)%" .. self.config.formula_end
+  if expression:match(match_expr) then
+    expression = expression:gsub(match_expr, function(match)
+      return self:resolve_expression(match)
+    end)
+    return self:resolve_recursive(expression)
+  end
+  -- clear intermediat results (: %d+) from the string
+  expression = expression:gsub(":%s*[%d%.]*", '')
+  return expression
+end
+
+--- Resolves references in a formula to their corresponding values
+---@param expression string The expression containing references to be resolved
+function Parsing:resolve_expression(expression)
+  -- Resolve "sum" expressions
+  expression = expression:gsub("sum%((%w+),%s*(%w+),?%s*(%d*)%)", function(table_name, column_name, row_index)
+    local data = {}
+    if row_index == '' then
+      data = self.rows[table_name][column_name]
+    elseif column_name == 'nil' then
+      data = {}
+      local table_data = self.rows[table_name] -- Get the table data by name
+      for header, column in pairs(table_data) do
+        if not header:match("^%s*$") then
+          table.insert(data, column[tonumber(row_index)]) -- Insert the value from the specific field into data
+        end
+      end
+    end
+    return self.utils:sum(data)
+  end)
+
+  -- Replace references like Table.Column.Row with actual values
+  expression = expression:gsub("(%w+).(%w+).(%d+)", function(table_name, column_name, row_index)
+    local table_data = self.rows[table_name] -- Get the table data by name
+    if table_data and table_data[column_name] then
+      local row_value = table_data[column_name][tonumber(row_index)]
+      return tostring(row_value) -- Convert the value to a string for Lua expressions
+    else
+      error("Invalid reference: ")
+    end
+  end)
+
+  return expression
+end
+
 return Parsing

@@ -73,19 +73,16 @@ function TestTableCalc:test_run_normal()
     write_to_buffer = function() end,
     table_calc_instance = instance,
     config = instance.config,
-    utils = instance.utils
+    parsing = instance.parsing,
+    utils = instance.utils,
   }
+  ---@type Parsing
   instance.parsing = {
     parse_structured_table = function() return {} end,
-    table_calc_instance = instance,
-    config = instance.config,
-    utils = instance.utils,
-    rows = self.rows
-  }
-  instance.utils = {
     process_data = function() return "processed data" end,
     table_calc_instance = instance,
     config = instance.config,
+    utils = instance.utils,
     rows = self.rows
   }
 

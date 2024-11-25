@@ -22,7 +22,7 @@ function Commands.setup()
     local args = opts.args
     local cols, rows, headers = args:match("(%d+)%s+(%d+)%s*(.*)")
 
-    require("nvim-tablecalc").get_instance():get_utils():insert_table(cols, rows, headers)
+    require("nvim-tablecalc").get_instance():get_core():insert_table(cols, rows, headers)
   end, { nargs = '*' })
 
   -- Create autocommands for both buffer opening and text changes
@@ -30,7 +30,7 @@ function Commands.setup()
     -- TODO: Should be dynamic --> related to plugin/nvim-tablecalc.lua
     pattern = { "*.org", "*.md" },
     callback = function()
-      require('nvim-tablecalc').get_instance():get_utils():highlight_curly_braces()
+      require('nvim-tablecalc').get_instance():get_core():highlight_curly_braces()
     end,
   })
 
@@ -38,7 +38,7 @@ function Commands.setup()
   vim.api.nvim_create_autocmd({ "BufLeave" }, {
     pattern = { "*.org", "*.md" },
     callback = function()
-      require('nvim-tablecalc').get_instance():get_utils():remove_highlight()
+      require('nvim-tablecalc').get_instance():get_core():remove_highlight()
     end,
   })
 end

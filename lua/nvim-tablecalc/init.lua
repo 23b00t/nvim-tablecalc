@@ -17,8 +17,6 @@ function TableCalc.get_instance()
   if not instance then
     instance = TableCalc.new()
   end
-  -- Instanciate with every call a new Parsing to reset its data
-  instance.parsing = require('nvim-tablecalc.parsing').new(instance)
   return instance
 end
 
@@ -28,7 +26,8 @@ function TableCalc.new()
   local self = setmetatable({}, TableCalc)
   -- Initialize the required components for TableCalc
   self.config = require('nvim-tablecalc.config').new()
-  self.utils = require('nvim-tablecalc.utils').new(self)
+  self.utils = require('nvim-tablecalc.utils').new()
+  self.parsing = require('nvim-tablecalc.parsing').new(self)
   self.core = require('nvim-tablecalc.core').new(self)
   self.setup_done = false
   return self
@@ -53,7 +52,7 @@ function TableCalc:run_normal()
   -- Parse the structured table from the content
   local tables = self.parsing:parse_structured_table(content)
   -- Process the parsed data
-  local modified_data = self.utils:process_data(tables)
+  local modified_data = self.parsing:process_data(tables)
   -- Write the processed data back to the buffer
   self.core:write_to_buffer(modified_data)
 end
@@ -68,6 +67,18 @@ end
 ---@return Utils The utilities object
 function TableCalc:get_utils()
   return self.utils
+end
+
+--- Method to get the parsing functions object
+---@return Parsing The utilities object
+function TableCalc:get_parsing()
+  return self.parsing
+end
+
+--- Method to get the core functions object
+---@return Core The utilities object
+function TableCalc:get_core()
+  return self.core
 end
 
 return TableCalc
