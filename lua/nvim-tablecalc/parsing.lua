@@ -95,7 +95,7 @@ function Parsing:process_data(table_data)
         if formula then
           -- Avoid recursive self call by checking if current cell is part of the formula
           if formula:match(table_name .. '.' .. column .. '.' .. i) then
-            error('No recurisve self calls!!!!!')
+            error('No recurisve self calls!')
           else
             -- Evaluate the formula and append the result to the cell
             local result = self:evaluate_formula(cell)
@@ -117,13 +117,13 @@ function Parsing:evaluate_formula(formula)
   local expression = self:resolve_recursive(formula)
   -- Load and execute the expression in the Lua environment if it is a math expression
   if expression:match("[^%.%s0-9%+%*%-%/%^]+") then
-    print("Only math is allowed, you expression is: ", expression)
+    error("Only math is allowed, you expression is: " .. expression)
   else
     local func, err = load("return " .. expression)
     if func then
       return func() -- Execute and return the result
     else
-      print("Error in evaluating formula:", err)
+      error("Error in evaluating formula:" .. err)
     end
   end
 end
@@ -140,7 +140,8 @@ function Parsing:resolve_recursive(expression)
     return self:resolve_recursive(expression)
   end
   -- clear intermediat results (: %d+) from the string
-  expression = expression:gsub(":%s*[%d%.]*", '')
+  expression = expression:gsub(":%s*-?[%d%.]*", '')
+
   return expression
 end
 
@@ -174,7 +175,7 @@ function Parsing:resolve_expression(expression)
       -- if the value is not empty return it as string else return '0' (to handle empty fields as 0)
       return row_value ~= '' and tostring(row_value) or '0' -- Convert the value to a string for Lua expressions
     else
-      error("Invalid reference: ")
+      error(string.format("Invalid reference: %s.%s.%s", table_name, column_name, row_index))
     end
   end)
 

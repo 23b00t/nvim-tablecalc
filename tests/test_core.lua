@@ -4,7 +4,7 @@ local luaunit = require('luaunit')
 package.path = package.path ..
     ";/home/user/code/lua/nvim-tablecalc/lua/?.lua;/home/user/code/lua/nvim-tablecalc/lua/?/init.lua"
 
-local TableCalc = require('lua/nvim-tablecalc.init')
+local TableCalc = require('nvim-tablecalc.init')
 
 _G.vim = {
   bo = { filetype = "lua" },

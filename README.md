@@ -22,8 +22,8 @@
     - ~~Set table_name_marker by filetype~~
     - ~~avoid recursiv self calls~~
     - ~~Table creator~~
-- Robust error handling
-- Fix: Using empty fields in formulas: Can't evaluate + 3 + 3
+- ~~Robust error handling~~
+- ~~Fix: Using empty fields in formulas: Can't evaluate + 3 + 3~~
 - refactor
 
 Today is Pungenday, the 26th day of The Aftermath in the YOLD 3190

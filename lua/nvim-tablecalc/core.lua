@@ -42,7 +42,7 @@ function Core:write_to_buffer(result_table)
     if formula and result then
       local escaped_formula = vim.pesc(formula)
       self.buffer = self.buffer:gsub(
-        escaped_formula .. ":?%s*[%d%.]*",
+        escaped_formula .. ":?%s*-?[%d%.]*",
         escaped_formula .. ': ' .. result
       )
     end
