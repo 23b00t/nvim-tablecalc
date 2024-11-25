@@ -22,7 +22,7 @@
     - ~~Set table_name_marker by filetype~~
     - ~~avoid recursiv self calls~~
     - ~~Table creator~~
-- Robust error handling
+- ~~Robust error handling~~
 - ~~Fix: Using empty fields in formulas: Can't evaluate + 3 + 3~~
 - refactor
 
