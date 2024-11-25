@@ -147,22 +147,25 @@ end
 --- Resolves references in a formula to their corresponding values
 ---@param expression string The expression containing references to be resolved
 function Parsing:resolve_expression(expression)
-  -- Resolve "sum" expressions
-  expression = expression:gsub("sum%((%w+),%s*(%w+),?%s*(%d*)%)", function(table_name, column_name, row_index)
-    local data = {}
-    if row_index == '' then
-      data = self.rows[table_name][column_name]
-    elseif column_name == 'nil' then
-      data = {}
-      local table_data = self.rows[table_name] -- Get the table data by name
-      for header, column in pairs(table_data) do
-        if not header:match("^%s*$") then
-          table.insert(data, column[tonumber(row_index)]) -- Insert the value from the specific field into data
+  -- Resolve sum and mul expressions
+  expression = expression:gsub("(sum|mul)%((%w+),%s*(%w+),?%s*(%d*)%)",
+    function(operation, table_name, column_name, row_index)
+      local data = {}
+      if row_index == '' then
+        data = self.rows[table_name][column_name]
+      elseif column_name == 'nil' then
+        data = {}
+        local table_data = self.rows[table_name] -- Get the table data by name
+        for header, column in pairs(table_data) do
+          if not header:match("^%s*$") then
+            table.insert(data, column[tonumber(row_index)]) -- Insert the value from the specific field into data
+          end
         end
       end
-    end
-    return self.utils:sum(data)
-  end)
+
+      -- Call the appropriate method (sum or mul)
+      return self.utils[operation](data)
+    end)
 
   -- Replace references like Table.Column.Row with actual values
   expression = expression:gsub("(%w+).(%w+).(%d+)", function(table_name, column_name, row_index)
