@@ -147,8 +147,8 @@ end
 --- Resolves references in a formula to their corresponding values
 ---@param expression string The expression containing references to be resolved
 function Parsing:resolve_expression(expression)
-  -- Resolve sum and mul expressions
-  expression = expression:gsub("(sum|mul)%((%w+),%s*(%w+),?%s*(%d*)%)",
+  -- Resolve sum end mul expressions
+  expression = expression:gsub("([sm]u[ml])%((%w+),%s*(%w+),?%s*(%d*)%)",
     function(operation, table_name, column_name, row_index)
       local data = {}
       if row_index == '' then
@@ -162,9 +162,8 @@ function Parsing:resolve_expression(expression)
           end
         end
       end
-
       -- Call the appropriate method (sum or mul)
-      return self.utils[operation](data)
+      return self.utils[operation](self.utils, data)
     end)
 
   -- Replace references like Table.Column.Row with actual values
