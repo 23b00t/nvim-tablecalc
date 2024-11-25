@@ -140,7 +140,8 @@ function Parsing:resolve_recursive(expression)
     return self:resolve_recursive(expression)
   end
   -- clear intermediat results (: %d+) from the string
-  expression = expression:gsub(":%s*[%d%.]*", '')
+  expression = expression:gsub(":%s*-?[%d%.]*", '')
+
   return expression
 end
 
