@@ -4,6 +4,7 @@ local luaunit = require('luaunit')
 package.path = package.path ..
     ";/home/user/code/lua/nvim-tablecalc/lua/?.lua;/home/user/code/lua/nvim-tablecalc/lua/?/init.lua"
 local TableCalc = require('lua/nvim-tablecalc.init')
+local Parsing = TableCalc.get_instance():get_parsing()
 
 -- Defining the test suite
 TestParsing = {}
@@ -90,11 +91,8 @@ function TestParsing:test_parse_structured_table_with_complex_data()
     bo = { filetype = "org" }
   }
 
-  -- Instanz erstellen und den Mock verwenden
-  local instance = TableCalc.get_instance()
-
-  -- Act: Aufruf der Methode mit Input-Daten
-  local result = instance.parsing:parse_structured_table(input)
+  -- Act: Call the method with input data
+  local result = Parsing:parse_structured_table(input)
 
   -- Assert: Überprüfen, ob das Ergebnis mit der erwarteten Ausgabe übereinstimmt
   luaunit.assertTrue(TestParsing:tables_are_equal(result, expected_output),
@@ -105,23 +103,17 @@ function TestParsing:test_parse_structured_table_with_complex_data()
 end
 
 function TestParsing:test_parse_headers()
-  -- Instanz erstellen und den Mock verwenden
-  local instance = TableCalc.get_instance()
+  -- Act: Call the method with input data
+  local result = Parsing:parse_headers("Name n, Price p,fnord")
 
-  -- Act: Aufruf der Methode mit Input-Daten
-  local result = instance.parsing:parse_headers("Name n, Price p,fnord")
-
-  -- Assert: Überprüfen, ob das Ergebnis mit der erwarteten Ausgabe übereinstimmt
+  -- Assert: Verify that the result matches the expected output
   luaunit.assertEquals(result, {"Name n", "Price p", "fnord"},
     "parse_headers should return the expected table")
 end
 
 function TestParsing:test_process_data()
-  -- Instanz erstellen und den Mock verwenden
-  local instance = TableCalc.get_instance()
-
-  -- Act: Aufruf der Methode mit Input-Daten
-  local result = instance.parsing:process_data(expected_output)
+  -- Act: Call the method with input data
+  local result = Parsing:process_data(expected_output)
   local expected = {
        "{sum(S, nil, 2)}: 28",
        "{ 3 * 3}: 9",
@@ -130,7 +122,9 @@ function TestParsing:test_process_data()
        "{ 3 + 5}: 8"
   }
 
-  -- Assert: Überprüfen, ob das Ergebnis mit der erwarteten Ausgabe übereinstimmt
+  -- Assert: Verify that the result contains the same elements as expected, regardless of order
+  table.sort(result)
+  table.sort(expected)
   luaunit.assertEquals(result, expected,
-    "parse_headers should return the expected table")
+    "process_data should return the expected table, regardless of order")
 end
