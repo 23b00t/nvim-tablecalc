@@ -4,6 +4,7 @@ local luaunit = require('luaunit')
 package.path = package.path ..
     ";/home/user/code/lua/nvim-tablecalc/lua/?.lua;/home/user/code/lua/nvim-tablecalc/lua/?/init.lua"
 local TableCalc = require('lua/nvim-tablecalc.init')
+local Parsing = TableCalc.get_instance():get_parsing()
 
 -- Defining the test suite
 TestParsing = {}
@@ -90,11 +91,8 @@ function TestParsing:test_parse_structured_table_with_complex_data()
     bo = { filetype = "org" }
   }
 
-  -- Instanz erstellen und den Mock verwenden
-  local instance = TableCalc.get_instance()
-
-  -- Act: Aufruf der Methode mit Input-Daten
-  local result = instance.parsing:parse_structured_table(input)
+  -- Act: Call the method with input data
+  local result = Parsing:parse_structured_table(input)
 
   -- Assert: Überprüfen, ob das Ergebnis mit der erwarteten Ausgabe übereinstimmt
   luaunit.assertTrue(TestParsing:tables_are_equal(result, expected_output),
@@ -102,4 +100,31 @@ function TestParsing:test_parse_structured_table_with_complex_data()
 
   -- Restore the original _G.vim value after the test
   _G.vim = original_vim
+end
+
+function TestParsing:test_parse_headers()
+  -- Act: Call the method with input data
+  local result = Parsing:parse_headers("Name n, Price p,fnord")
+
+  -- Assert: Verify that the result matches the expected output
+  luaunit.assertEquals(result, {"Name n", "Price p", "fnord"},
+    "parse_headers should return the expected table")
+end
+
+function TestParsing:test_process_data()
+  -- Act: Call the method with input data
+  local result = Parsing:process_data(expected_output)
+  local expected = {
+       "{sum(S, nil, 2)}: 28",
+       "{ 3 * 3}: 9",
+       "{sum(t, N)}: 33",
+       "{S.c.3 + S.c.2}: 28",
+       "{ 3 + 5}: 8"
+  }
+
+  -- Assert: Verify that the result contains the same elements as expected, regardless of order
+  table.sort(result)
+  table.sort(expected)
+  luaunit.assertEquals(result, expected,
+    "process_data should return the expected table, regardless of order")
 end

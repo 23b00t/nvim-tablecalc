@@ -8,14 +8,14 @@ local TableCalc = require('lua/nvim-tablecalc.init')
 -- Defining the test suite
 TestTableCalc = {}
 
--- Test 1: Check if get_instance creates a new instance with a Parsing object
+-- Check if get_instance creates a new instance with a Parsing object
 function TestTableCalc:test_get_instance()
   local instance = TableCalc.get_instance()
   luaunit.assertNotNil(instance, "Instance should not be nil")
   luaunit.assertNotNil(instance.parsing, "Parsing object should be initialized")
 end
 
--- Test 2: Check if new creates a TableCalc instance with all required fields
+-- Check if new creates a TableCalc instance with all required fields
 function TestTableCalc:test_new_instance()
   local instance = TableCalc.new()
   luaunit.assertNotNil(instance, "New instance should not be nil")
@@ -25,7 +25,7 @@ function TestTableCalc:test_new_instance()
   luaunit.assertFalse(instance.setup_done, "Setup flag should be false initially")
 end
 
--- Test 3: Check if setup method correctly sets the setup_done flag to true
+-- Check if setup method correctly sets the setup_done flag to true
 function TestTableCalc:test_setup()
   -- Mock the vim.api functions
   local mock_keymaps = {}
@@ -63,7 +63,7 @@ function TestTableCalc:test_setup()
   luaunit.assertTrue(normal_mapping.opts.silent, "First keymap should have silent=true")
 end
 
--- Test 4: Check if run_normal method correctly processes data in normal mode
+-- Check if run_normal method correctly processes data in normal mode
 function TestTableCalc:test_run_normal()
   local instance = TableCalc.new()
   -- Mocking the core and parsing methods
@@ -93,16 +93,30 @@ function TestTableCalc:test_run_normal()
   luaunit.assertTrue(true)
 end
 
--- Test 6: Check if get_config returns the correct config object
+-- Check if get_config returns the correct config object
 function TestTableCalc:test_get_config()
   local instance = TableCalc.new()
   local config = instance:get_config()
   luaunit.assertNotNil(config, "Config object should be returned")
 end
 
--- Test 9: Check if get_utils returns the correct utils object
+-- Check if get_utils returns the correct utils object
 function TestTableCalc:test_get_utils()
   local instance = TableCalc.get_instance()
   local utils = instance:get_utils()
   luaunit.assertNotNil(utils, "Utils object should be returned")
+end
+
+-- Check if get_utils returns the correct core object
+function TestTableCalc:test_get_core()
+  local instance = TableCalc.get_instance()
+  local utils = instance:get_core()
+  luaunit.assertNotNil(utils, "Core object should be returned")
+end
+
+-- Check if get_utils returns the correct parsing object
+function TestTableCalc:test_get_parsing()
+  local instance = TableCalc.get_instance()
+  local utils = instance:get_parsing()
+  luaunit.assertNotNil(utils, "Parsing object should be returned")
 end
