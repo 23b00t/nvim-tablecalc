@@ -45,16 +45,29 @@ function TableCalc:setup(user_setup)
   end
 end
 
---- Method to run TableCalc in normal mode
+-- Method to run TableCalc in normal mode with error handling
 function TableCalc:run_normal()
-  -- Read the buffer content in normal mode
-  local content = self.core:read_buffer_normal()
-  -- Parse the structured table from the content
-  local tables = self.parsing:parse_structured_table(content)
-  -- Process the parsed data
-  local modified_data = self.parsing:process_data(tables)
-  -- Write the processed data back to the buffer
-  self.core:write_to_buffer(modified_data)
+  -- Wrap the whole function in a protected call to catch errors
+  local success, result = pcall(function()
+    -- Read the buffer content in normal mode
+    local content = self.core:read_buffer_normal()
+    -- Parse the structured table from the content
+    local tables = self.parsing:parse_structured_table(content)
+    -- Process the parsed data
+    local modified_data = self.parsing:process_data(tables)
+    -- Write the processed data back to the buffer
+    self.core:write_to_buffer(modified_data)
+  end)
+
+  -- If there was an error, handle it
+  if not success then
+    -- Log the error to Neovim's notification system
+    local error_message = "Error: " .. (result or "Unknown error occurred")
+    vim.notify(error_message, vim.log.levels.ERROR)
+
+    -- Write the error to the :messages buffer
+    vim.api.nvim_out_write(error_message .. "\n")
+  end
 end
 
 --- Method to get the configuration object
