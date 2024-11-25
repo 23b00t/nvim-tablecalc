@@ -23,7 +23,7 @@ function Config.new()
     org = '#',
     markdown = '%[%/%/%]: #',
   }
-  self.user_command = nil
+  self.user_command = ''
   self.commands = {
     org = 'normal! gggqG',
     -- TODO: Add more filetypes, e.g., md, csv
@@ -34,7 +34,8 @@ end
 --- Gets the command associated with the current filetype
 ---@return string The command for the current filetype
 function Config:get_command()
-  if self.user_command then
+  -- Check if user_command is not an empty string
+  if self.user_command ~= '' then
     return self.user_command
   else
     return self.commands[vim.bo.filetype] or ''

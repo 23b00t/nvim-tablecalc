@@ -10,6 +10,7 @@ package.path = package.path ..
 require('tests.test_tablecalc')
 require('tests.test_parsing')
 require('tests.test_utils')
+require('tests.test_config')
 
 -- Run the tests
 os.exit(luaunit.LuaUnit.run())
