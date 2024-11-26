@@ -16,9 +16,7 @@ _G.vim = {
     end,
   },
 
-  cmd = function(command)
-    print("Executing vim command: " .. command)
-  end,
+  cmd = function() end,
 
   pesc = function(input)
     return input

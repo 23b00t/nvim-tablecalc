@@ -116,15 +116,16 @@ function Parsing:evaluate_formula(formula)
   -- Resolve references in the formula to their actual values
   local expression = self:resolve_recursive(formula)
   -- Load and execute the expression in the Lua environment if it is a math expression
-  if expression:match("[^%.%s0-9%+%*%-%/%^]+") then
-    error("Only math is allowed, you expression is: " .. expression)
+  expression = expression:gsub("[^%%%.%s0-9%+%*%-%/%^]", "") -- Remove invalid characters
+      :gsub("([%%%^%+-%*/])%s*%1", "%1")                     -- Reduce multiple identical operators
+      :gsub("^%s*[%+%*%%%^/]+", "")                          -- Remove leading operators and preceding spaces
+      :gsub("[%+%*%%%^/-]%s*$", "")                          -- Remove trailing single operators
+
+  local func, err = load("return " .. expression)
+  if func then
+    return func()   -- Execute and return the result
   else
-    local func, err = load("return " .. expression)
-    if func then
-      return func() -- Execute and return the result
-    else
-      error("Error in evaluating formula:" .. err)
-    end
+    error("Error in evaluating formula:" .. err)
   end
 end
 
@@ -163,8 +164,9 @@ function Parsing:resolve_expression(expression)
           end
         end
       end
-      -- Call the appropriate method (sum or mul)
-      return self.utils[operation](self.utils, data)
+      -- Convert data to a mathematical expression and remove the calling expression from it
+      local operator = operation == "sum" and "+" or "*"
+      return table.concat(data, operator):gsub(vim.pesc(expression), "")
     end)
 
   -- Replace references like Table.Column.Row with actual values
@@ -174,8 +176,6 @@ function Parsing:resolve_expression(expression)
       local row_value = table_data[column_name][tonumber(row_index)]
       -- if the value is not empty return it as string else return '0' (to handle empty fields as 0)
       return row_value ~= '' and tostring(row_value) or '0' -- Convert the value to a string for Lua expressions
-    else
-      error(string.format("Invalid reference: %s.%s.%s", table_name, column_name, row_index))
     end
   end)
 
