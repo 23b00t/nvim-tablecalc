@@ -22,31 +22,4 @@ function Utils.stripe(str)
   return (str or ""):match("^%s*(.-)%s*$")
 end
 
---- Sums the values
----@param data table
----@return number The sum of the values
-function Utils:sum(data)
-  local sum = 0
-  -- Iterate through the data and sum the numeric values
-  for i = 1, #data do
-    if tonumber(data[i]) then
-      sum = sum + tonumber(data[i])
-    end
-  end
-  return sum
-end
-
---- Multiplys the values
----@param data table
----@return number
-function Utils:mul(data)
-  local mul = 1
-  for i = 1, #data do
-    if tonumber(data[i]) then
-      mul = mul * tonumber(data[i])
-    end
-  end
-  return mul
-end
-
 return Utils
