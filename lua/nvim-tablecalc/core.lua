@@ -52,7 +52,8 @@ function Core:write_to_buffer(result_table)
   -- Replace the entire buffer content with the new lines
   vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
   -- Run autoformat command after writing to the buffer
-  vim.cmd(self.config:autoformat_buffer())
+  ---@diagnostic disable-next-line: redundant-parameter
+  vim.cmd(self.config:get_command())
 end
 
 -- Function to insert a table with rows, columns, and optional headers
