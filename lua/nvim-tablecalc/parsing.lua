@@ -116,23 +116,25 @@ function Parsing:evaluate_formula(formula)
   -- Resolve references in the formula to their actual values
   local expression = self:resolve_recursive(formula)
   -- Load and execute the expression in the Lua environment if it is a math expression
-  -- TODO: Handle -+; Check edge cases; refactor in seperate method
-  expression = expression
-      :gsub("[^%.%s0-9%+%*%-%/%^]", "") -- Remove invalid characters
-      :gsub("^%s*[%+%*%/%^]+", "")    -- Remove leading operators (not `-`) and preceding spaces
-      :gsub("[%+%*%/%^%-]%s*$", "")   -- Remove trailing operators
-      :gsub("([%%%^%+%*/%-])%s*([%%%^%+%*/%-])", function(op1, op2)
-        if op1 == op2 then
-          return op1   -- Keep only one operator if they are identical
-        elseif op1 == "-" and op2 == "-" then
-          return "+"   -- Replace `--` with `+`
-        else
-          return op2   -- Keep the second operator in other cases
-        end
-      end)
-      :gsub("%-%-", "+") -- Replace double negative with addition
-      :gsub("%s+", "") -- Remove any remaining spaces
-
+  while expression:match("([%%%^%+%*/%-])%s*([%%%^%+%*/%-])") do
+    expression = expression
+        :gsub("[^%.0-9%+%*%-%/%^%(%)]", "") -- Remove invalid characters
+        :gsub("([%%%^%+%*/%-])%s*([%%%^%+%*/%-])", function(op1, op2)
+          if op1 == "-" and op2 == "-" then
+            return "+" -- Replace `--` with `+`
+          elseif op1 == "-" and op2 == "+" then
+            return "-" -- Replace `-+` with `-`
+          elseif op1 == "+" and op2 == "-" then
+            return "-" -- Replace `+-` with `-`
+          elseif op1 == op2 then
+            return op1 -- Keep only one operator if they are identical
+          else
+            return op2 -- Keep the second operator in other cases
+          end
+        end)
+        :gsub("^%s*[%+%*%/%^]+", "")   -- Remove leading operators (not `-`) and preceding spaces
+        :gsub("[%+%*%/%^%-]+%s*$", "") -- Remove trailing operators
+  end
   local func, err = load("return " .. expression)
   if func then
     return func() -- Execute and return the result
