@@ -104,19 +104,26 @@ function TestParsing:test_parse_headers()
   local result = Parsing:parse_headers("Name n, Price p,fnord")
 
   -- Assert: Verify that the result matches the expected output
-  luaunit.assertEquals(result, {"Name n", "Price p", "fnord"},
+  luaunit.assertEquals(result, { "Name n", "Price p", "fnord" },
     "parse_headers should return the expected table")
 end
 
 function TestParsing:test_process_data()
+  -- mock vim.pesc
+  _G.vim = {
+    pesc = function(str)
+      return str:gsub("([^%w])", "%%%1")
+    end
+  }
+
   -- Act: Call the method with input data
   local result = Parsing:process_data(expected_output)
   local expected = {
-       "{sum(S, nil, 2)}: 28",
-       "{ 3 * 3}: 9",
-       "{sum(t, N)}: 33",
-       "{S.c.3 + S.c.2}: 28",
-       "{ 3 + 5}: 8"
+    "{sum(S, nil, 2)}: 28",
+    "{ 3 * 3}: 9",
+    "{sum(t, N)}: 33",
+    "{S.c.3 + S.c.2}: 28",
+    "{ 3 + 5}: 8"
   }
 
   -- Assert: Verify that the result contains the same elements as expected, regardless of order
