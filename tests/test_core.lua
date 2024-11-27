@@ -14,6 +14,8 @@ _G.vim = {
     nvim_put = function()
       _G.vim.api.nvim_put_called = true -- Flag for checking if nvim_put is called
     end,
+    nvim_win_get_cursor = function() end,
+    nvim_win_set_cursor = function() end,
   },
 
   cmd = function() end,
@@ -21,6 +23,7 @@ _G.vim = {
   pesc = function(input)
     return input
   end,
+
 
   -- Mock for vim.split
   split = function(str, delimiter)
