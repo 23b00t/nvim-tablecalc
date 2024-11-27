@@ -106,20 +106,20 @@ function Core:highlight_curly_braces()
   self.match_id = vim.fn.matchadd("PurpleCurly", self.config.formula_begin .. "[^|]*" .. self.config.formula_end)
 end
 
--- Remove the custom highlighting
-function Core:remove_highlight()
-  if self:match_exists() then vim.fn.matchdelete(self.match_id) end
-end
-
 -- Check if a formula expression was matched by vim
-function Core:match_exists()
+local function match_exists(match_id)
   local matches = vim.fn.getmatches() -- Get all active matches
   for _, match in ipairs(matches) do
-    if match.id == self.match_id then
+    if match.id == match_id then
       return true
     end
   end
   return false
+end
+
+-- Remove the custom highlighting
+function Core:remove_highlight()
+  if match_exists(self.match_id) then vim.fn.matchdelete(self.match_id) end
 end
 
 return Core
