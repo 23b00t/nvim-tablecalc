@@ -25,7 +25,7 @@ end
 
 --- Parses a structured table with headers and stores it in a nested format
 ---@param content string The content to be parsed, containing table data
----@return table The parsed rows stored in a nested table format
+---@return table: The parsed rows stored in a nested table format
 function Parsing:parse_structured_table(content)
   local current_table_name = "" -- Variable to track the current table name
   local headers = {}            -- Array to store the column headers of the current table
@@ -111,20 +111,17 @@ end
 
 --- Evaluates a mathematical formula
 ---@param formula string The formula to be evaluated
----@return any The result of the evaluated formula
+---@return any: The result of the evaluated formula
 function Parsing:evaluate_formula(formula)
   -- Resolve references in the formula to their actual values
   local expression = self:resolve_recursive(formula)
+  local simplifyed_expression = self.utils:simplify_expression(expression)
   -- Load and execute the expression in the Lua environment if it is a math expression
-  if expression:match("[^%.%s0-9%+%*%-%/%^]+") then
-    error("Only math is allowed, you expression is: " .. expression)
+  local func, err = load("return " .. simplifyed_expression)
+  if func then
+    return func() -- Execute and return the result
   else
-    local func, err = load("return " .. expression)
-    if func then
-      return func() -- Execute and return the result
-    else
-      error("Error in evaluating formula:" .. err)
-    end
+    error("Error in evaluating formula:" .. err)
   end
 end
 
@@ -163,8 +160,9 @@ function Parsing:resolve_expression(expression)
           end
         end
       end
-      -- Call the appropriate method (sum or mul)
-      return self.utils[operation](self.utils, data)
+      -- Convert data to a mathematical expression and remove the calling expression from it
+      local operator = operation == "sum" and "+" or "*"
+      return table.concat(data, operator):gsub(vim.pesc(expression), "")
     end)
 
   -- Replace references like Table.Column.Row with actual values
@@ -174,8 +172,6 @@ function Parsing:resolve_expression(expression)
       local row_value = table_data[column_name][tonumber(row_index)]
       -- if the value is not empty return it as string else return '0' (to handle empty fields as 0)
       return row_value ~= '' and tostring(row_value) or '0' -- Convert the value to a string for Lua expressions
-    else
-      error(string.format("Invalid reference: %s.%s.%s", table_name, column_name, row_index))
     end
   end)
 

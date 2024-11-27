@@ -24,6 +24,9 @@
     - ~~Table creator~~
 - ~~Robust error handling~~
 - ~~Fix: Using empty fields in formulas: Can't evaluate + 3 + 3~~
+- ~~Hotfix: sum~~
+- Header row should be parsed correctly if it is not the direct follower of table_name
+- After reformating the buffer the cursor should stay at its current position (and not jump to the top)
 - refactor
 
 Today is Pungenday, the 26th day of The Aftermath in the YOLD 3190

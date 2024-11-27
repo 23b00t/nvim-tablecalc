@@ -6,7 +6,7 @@ local luaunit = require('luaunit')
 package.path = package.path ..
     ";/home/user/code/lua/nvim-tablecalc/lua/?.lua;/home/user/code/lua/nvim-tablecalc/lua/?/init.lua"
 
- _G.TableCalc = require('lua/nvim-tablecalc.init')
+ _G.TableCalc = require('nvim-tablecalc.init')
 
 -- Include all the individual test files
 require('tests.test_tablecalc')

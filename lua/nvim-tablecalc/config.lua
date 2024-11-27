@@ -42,12 +42,6 @@ function Config:get_command()
   end
 end
 
---- Returns the command to autoformat the buffer based on the current filetype
----@return string The autoformat command for the buffer
-function Config:autoformat_buffer()
-  return self:get_command()
-end
-
 ---@return string table_name_marker
 function Config:get_table_name_marker()
   return self.table_name_marker[vim.bo.filetype] or '#'
