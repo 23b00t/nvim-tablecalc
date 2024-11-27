@@ -10,8 +10,11 @@ Utils.__index = Utils
 
 --- Creates a new instance of Utils
 ---@return Utils A new instance of the Utils class
-function Utils.new()
+function Utils.new(table_calc_instance)
   local self = setmetatable({}, Utils)
+  self.table_calc_instance = table_calc_instance
+  -- Get the configuration from the TableCalc instance
+  self.config = table_calc_instance:get_config()
   return self
 end
 
@@ -67,5 +70,12 @@ function Utils:simplify_expression(expression)
   return expression
 end
 
+-- Save cursor position, reformat table, restore curser position
+function Utils:reformat_table()
+  local cursor_pos = vim.api.nvim_win_get_cursor(0)
+  ---@diagnostic disable-next-line: redundant-parameter
+  vim.cmd(self.config:get_command())
+  vim.api.nvim_win_set_cursor(0, cursor_pos)
+end
 
 return Utils

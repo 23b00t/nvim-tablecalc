@@ -26,7 +26,7 @@ function TableCalc.new()
   local self = setmetatable({}, TableCalc)
   -- Initialize the required components for TableCalc
   self.config = require('nvim-tablecalc.config').new()
-  self.utils = require('nvim-tablecalc.utils').new()
+  self.utils = require('nvim-tablecalc.utils').new(self)
   self.parsing = require('nvim-tablecalc.parsing').new(self)
   self.core = require('nvim-tablecalc.core').new(self)
   self.setup_done = false
