@@ -88,7 +88,7 @@ function TestConfig:test_autoformat_buffer()
   local instance = Config.new()
 
   -- Act: Get the autoformat command
-  local command = instance:autoformat_buffer()
+  local command = instance:get_command()
 
   -- Assert: Ensure the autoformat command is correct
   luaunit.assertEquals(command, "normal! gggqG", "autoformat_buffer should return the filetype-specific command")

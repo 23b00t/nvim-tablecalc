@@ -92,7 +92,8 @@ function Core:insert_table(cols, rows, headers)
   vim.api.nvim_put(tbl, "l", true, true)
 
   -- Run autoformat command after writing to the buffer
-  vim.cmd(self.config:autoformat_buffer())
+  ---@diagnostic disable-next-line: redundant-parameter
+  vim.cmd(self.config:get_command())
 end
 
 -- Highlight formula
