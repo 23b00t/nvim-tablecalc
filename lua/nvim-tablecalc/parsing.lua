@@ -25,7 +25,7 @@ end
 
 --- Parses a structured table with headers and stores it in a nested format
 ---@param content string The content to be parsed, containing table data
----@return table The parsed rows stored in a nested table format
+---@return table: The parsed rows stored in a nested table format
 function Parsing:parse_structured_table(content)
   local current_table_name = "" -- Variable to track the current table name
   local headers = {}            -- Array to store the column headers of the current table
@@ -111,31 +111,13 @@ end
 
 --- Evaluates a mathematical formula
 ---@param formula string The formula to be evaluated
----@return any The result of the evaluated formula
+---@return any: The result of the evaluated formula
 function Parsing:evaluate_formula(formula)
   -- Resolve references in the formula to their actual values
   local expression = self:resolve_recursive(formula)
+  local simplifyed_expression = self.utils:simplify_expression(expression)
   -- Load and execute the expression in the Lua environment if it is a math expression
-  while expression:match("([%%%^%+%*/%-])%s*([%%%^%+%*/%-])") do
-    expression = expression
-        :gsub("[^%.0-9%+%*%-%/%^%(%)]", "") -- Remove invalid characters
-        :gsub("([%%%^%+%*/%-])%s*([%%%^%+%*/%-])", function(op1, op2)
-          if op1 == "-" and op2 == "-" then
-            return "+" -- Replace `--` with `+`
-          elseif op1 == "-" and op2 == "+" then
-            return "-" -- Replace `-+` with `-`
-          elseif op1 == "+" and op2 == "-" then
-            return "-" -- Replace `+-` with `-`
-          elseif op1 == op2 then
-            return op1 -- Keep only one operator if they are identical
-          else
-            return op2 -- Keep the second operator in other cases
-          end
-        end)
-        :gsub("^%s*[%+%*%/%^]+", "")   -- Remove leading operators (not `-`) and preceding spaces
-        :gsub("[%+%*%/%^%-]+%s*$", "") -- Remove trailing operators
-  end
-  local func, err = load("return " .. expression)
+  local func, err = load("return " .. simplifyed_expression)
   if func then
     return func() -- Execute and return the result
   else
