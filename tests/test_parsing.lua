@@ -58,28 +58,6 @@ local expected_output = {
   }
 }
 
-function TestParsing:tables_are_equal(t1, t2)
-  if t1 == t2 then return true end -- Referenzgleichheit
-
-  if type(t1) ~= "table" or type(t2) ~= "table" then
-    return false
-  end
-
-  for key, value in pairs(t1) do
-    if not TestParsing:tables_are_equal(value, t2[key]) then
-      return false
-    end
-  end
-
-  for key, value in pairs(t2) do
-    if not TestParsing:tables_are_equal(value, t1[key]) then
-      return false
-    end
-  end
-
-  return true
-end
-
 function TestParsing:test_parse_structured_table_with_complex_data()
   -- Save the original _G.vim value
   local original_vim = _G.vim
@@ -92,7 +70,7 @@ function TestParsing:test_parse_structured_table_with_complex_data()
   local result = Parsing:parse_structured_table(input)
 
   -- Assert: Überprüfen, ob das Ergebnis mit der erwarteten Ausgabe übereinstimmt
-  luaunit.assertTrue(TestParsing:tables_are_equal(result, expected_output),
+  luaunit.assertEquals(result, expected_output,
     "parse_structured_table should return the expected complex structured data")
 
   -- Restore the original _G.vim value after the test
