@@ -62,6 +62,7 @@ end
 -- INFO: Example usage
 -- insert_table(3, 5) -- Table with 3 columns, 5 rows, no headers
 -- insert_table(3, 3, Name, Age,City) -- Table with headers
+-- TODO: Refactor
 function Core:insert_table(cols, rows, headers)
   local tbl = {}
 
@@ -75,6 +76,10 @@ function Core:insert_table(cols, rows, headers)
     table.insert(header, use_headers and (headers_table[c] or "") or " ")
   end
 
+  -- Add the top border
+  table.insert(tbl, "|" .. string.rep("----|", cols + 1))
+
+  -- Add the header row and separator
   table.insert(tbl, "| " .. table.concat(header, " | ") .. " |")
   table.insert(tbl, "|" .. string.rep("-----|", cols + 1)) -- Separator row
 
@@ -86,6 +91,9 @@ function Core:insert_table(cols, rows, headers)
     end
     table.insert(tbl, "| " .. table.concat(row, " | ") .. " |")
   end
+
+  -- Add the bottom border
+  table.insert(tbl, "|" .. string.rep("----|", cols + 1))
 
   -- Insert the table into the current buffer
   vim.api.nvim_put(tbl, "l", true, true)
