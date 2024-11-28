@@ -37,7 +37,7 @@ function Parsing:parse_structured_table(content)
       current_table_name = line:match(self.config:get_table_name_marker() .. "%s*.-%s(%w+)%s*$")
       self.rows[current_table_name] = {} -- Initialize a table for the extracted table name
       headers = {}                       -- Reset headers for the new table
-    elseif line:match(self.config.delimiter) then
+    elseif line:find(self.config.delimiter) and line:find("%w") then
       -- If headers are not set, parse the current line as the header row
       if #headers == 0 then
         for header in line:gmatch(self.config.delimiter .. "%s*([^" .. self.config.delimiter .. "]+)%s*") do
