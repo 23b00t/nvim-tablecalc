@@ -28,7 +28,7 @@
 - ~~Hotfix: sum~~
 - ~~Header row should be parsed correctly if it is not the direct follower of table_name~~
 - ~~After reformating the buffer the cursor should stay at its current position (and not jump to the top)~~
-- Tests: Add setUp and tearDown for mocking and cleaning up
+- ~~Tests: Add setUp and tearDown for mocking and cleaning up~~
 - Should TableCreate be a seperate plugin? Re-think structure...
 - refactor
 
