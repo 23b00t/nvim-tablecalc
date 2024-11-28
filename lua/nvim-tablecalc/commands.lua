@@ -26,7 +26,7 @@ function Commands.setup()
   end, { nargs = '*' })
 
   -- Create autocommands for both buffer opening and text changes
-  vim.api.nvim_create_autocmd({ "BufEnter", "TextChanged", "InsertLeave" }, {
+  vim.api.nvim_create_autocmd({ "BufEnter" }, {
     -- TODO: Should be dynamic --> related to plugin/nvim-tablecalc.lua
     pattern = { "*.org", "*.md" },
     callback = function()

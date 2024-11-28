@@ -109,7 +109,8 @@ function Core:highlight_curly_braces()
   vim.api.nvim_set_hl(0, "PurpleCurly", { fg = "#b279d2" })
 
   -- Add the match for formula markers and their contents, not match pipe to avoid matching the closing tag of the next cell
-  self.match_id = vim.fn.matchadd("PurpleCurly", self.config.formula_begin .. "[^|]*" .. self.config.formula_end)
+  self.match_id = vim.fn.matchadd("PurpleCurly",
+    self.config.formula_begin .. "[^" .. self.config.delimiter .. "]*" .. self.config.formula_end)
 end
 
 -- Check if a formula expression was matched by vim
