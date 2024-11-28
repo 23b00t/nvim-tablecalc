@@ -2,45 +2,48 @@ local luaunit = require('luaunit')
 
 local TableCalc = _G.TableCalc
 
-_G.vim = {
-  bo = { filetype = "lua" },
-  api = {
-    nvim_buf_get_lines = function()
-      return { "line 1", "line 2" }
-    end,
-    nvim_buf_set_lines = function()
-      _G.vim.api.nvim_buf_set_lines_called = true -- Flag for checking if nvim_buf_set_lines is called
-    end,
-    nvim_put = function()
-      _G.vim.api.nvim_put_called = true -- Flag for checking if nvim_put is called
-    end,
-    nvim_win_get_cursor = function() end,
-    nvim_win_set_cursor = function() end,
-  },
-
-  cmd = function() end,
-
-  pesc = function(input)
-    return input
-  end,
-
-
-  -- Mock for vim.split
-  split = function(str, delimiter)
-    -- Mimic splitting the string by delimiter
-    local result = {}
-    if delimiter == '\n' then
-      for line in str:gmatch("([^\n]+)") do
-        table.insert(result, line)
-      end
-    end
-    return result
-  end,
-}
-
 local Core = require("nvim-tablecalc.core")
 
 TestCore = {}
+
+function TestCore:setUp()
+  self.original_vim = _G.vim
+  _G.vim = {
+    bo = { filetype = "lua" },
+    api = {
+      nvim_buf_get_lines = function()
+        return { "line 1", "line 2" }
+      end,
+      nvim_buf_set_lines = function()
+        _G.vim.api.nvim_buf_set_lines_called = true -- Flag for checking if nvim_buf_set_lines is called
+      end,
+      nvim_put = function()
+        _G.vim.api.nvim_put_called = true -- Flag for checking if nvim_put is called
+      end,
+      nvim_win_get_cursor = function() end,
+      nvim_win_set_cursor = function() end,
+    },
+
+    cmd = function() end,
+
+    pesc = function(input)
+      return input
+    end,
+
+
+    -- Mock for vim.split
+    split = function(str, delimiter)
+      -- Mimic splitting the string by delimiter
+      local result = {}
+      if delimiter == '\n' then
+        for line in str:gmatch("([^\n]+)") do
+          table.insert(result, line)
+        end
+      end
+      return result
+    end,
+  }
+end
 
 function TestCore:test_new_instance()
   local table_calc_instance = TableCalc.get_instance()
@@ -73,4 +76,7 @@ function TestCore:test_insert_table()
   luaunit.assertTrue(vim.api.nvim_put_called, "vim.api.nvim_put should be called to insert the table")
 end
 
-return TestCore
+-- Restore the original _G.vim value after the test
+function TestCore:tearDown()
+  _G.vim = self.original_vim
+end

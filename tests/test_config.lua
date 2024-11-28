@@ -1,22 +1,19 @@
 local luaunit = require('luaunit')
 
--- Extending package.path to correctly set the directory for modules
-package.path = package.path ..
-    ";/home/user/code/lua/nvim-tablecalc/lua/?.lua;/home/user/code/lua/nvim-tablecalc/lua/?/init.lua"
 local Config = require("nvim-tablecalc.config")
 
 TestConfig = {}
+
+-- Save original vim table to restore it after mocking it in tests
+function TestConfig:setUp()
+  self.original_vim = _G.vim
+end
 
 -- Helper function to mock _G.vim
 local function mock_vim(filetype)
   _G.vim = {
     bo = { filetype = filetype }
   }
-end
-
--- Helper function to restore the original _G.vim
-local function restore_vim(original_vim)
-  _G.vim = original_vim
 end
 
 function TestConfig:test_new_instance()
@@ -33,7 +30,6 @@ function TestConfig:test_new_instance()
 end
 
 function TestConfig:test_get_command_with_user_command()
-  local original_vim = _G.vim
   -- Arrange: Mock vim.bo.filetype for test and set user command
   mock_vim("lua")
   local instance = Config.new()
@@ -44,13 +40,9 @@ function TestConfig:test_get_command_with_user_command()
 
   -- Assert: Ensure user command is returned
   luaunit.assertEquals(command, "custom_command", "get_command should return the user-defined command")
-
-  -- Restore the original _G.vim value after the test
-  restore_vim(original_vim)
 end
 
 function TestConfig:test_get_command_without_user_command()
-  local original_vim = _G.vim
   -- Arrange: Mock vim.bo.filetype for test
   mock_vim("org")
   local instance = Config.new()
@@ -60,13 +52,9 @@ function TestConfig:test_get_command_without_user_command()
 
   -- Assert: Ensure filetype-specific command is returned
   luaunit.assertEquals(command, "normal! gggqG", "get_command should return the filetype-specific command")
-
-  -- Restore the original _G.vim value after the test
-  restore_vim(original_vim)
 end
 
 function TestConfig:test_get_command_with_unknown_filetype()
-  local original_vim = _G.vim
   -- Arrange: Mock vim.bo.filetype for test
   mock_vim("lua")
   local instance = Config.new()
@@ -76,13 +64,9 @@ function TestConfig:test_get_command_with_unknown_filetype()
 
   -- Assert: Ensure an empty string is returned for unknown filetype
   luaunit.assertEquals(command, "", "get_command should return an empty string for unknown filetypes")
-
-  -- Restore the original _G.vim value after the test
-  restore_vim(original_vim)
 end
 
 function TestConfig:test_autoformat_buffer()
-  local original_vim = _G.vim
   -- Arrange: Mock vim.bo.filetype for test
   mock_vim("org")
   local instance = Config.new()
@@ -92,13 +76,9 @@ function TestConfig:test_autoformat_buffer()
 
   -- Assert: Ensure the autoformat command is correct
   luaunit.assertEquals(command, "normal! gggqG", "autoformat_buffer should return the filetype-specific command")
-
-  -- Restore the original _G.vim value after the test
-  restore_vim(original_vim)
 end
 
 function TestConfig:test_get_table_name_marker_with_known_filetype()
-  local original_vim = _G.vim
   -- Arrange: Mock vim.bo.filetype for test
   mock_vim("org")
   local instance = Config.new()
@@ -108,13 +88,9 @@ function TestConfig:test_get_table_name_marker_with_known_filetype()
 
   -- Assert: Ensure the correct marker is returned
   luaunit.assertEquals(marker, "#", "get_table_name_marker should return the correct marker for known filetypes")
-
-  -- Restore the original _G.vim value after the test
-  restore_vim(original_vim)
 end
 
 function TestConfig:test_get_table_name_marker_with_unknown_filetype()
-  local original_vim = _G.vim
   -- Arrange: Mock vim.bo.filetype for test
   mock_vim("unknown_filetype")
   local instance = Config.new()
@@ -124,9 +100,6 @@ function TestConfig:test_get_table_name_marker_with_unknown_filetype()
 
   -- Assert: Ensure the default marker is returned
   luaunit.assertEquals(marker, "#", "get_table_name_marker should return the default marker for unknown filetypes")
-
-  -- Restore the original _G.vim value after the test
-  restore_vim(original_vim)
 end
 
 function TestConfig:test_set_user_config()
@@ -149,4 +122,7 @@ function TestConfig:test_set_user_config()
   luaunit.assertEquals(instance.user_command, "custom_autoformat", "user_command should be updated to 'custom_autoformat'")
 end
 
-return TestConfig
+-- Restore the original _G.vim value after the test
+function TestConfig:tearDown()
+  _G.vim = self.original_vim
+end
