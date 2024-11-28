@@ -16,4 +16,6 @@ require('tests.test_config')
 require('tests.test_core')
 
 -- Run the tests
-os.exit(luaunit.LuaUnit.run())
+local lu = luaunit.LuaUnit.new()
+lu:setOutputType("tap")
+os.exit( lu:runSuite() )
