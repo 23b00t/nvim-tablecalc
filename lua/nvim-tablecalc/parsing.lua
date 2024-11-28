@@ -48,9 +48,9 @@ function Parsing:parse_structured_table(content)
         end
       else
         -- Parse table rows and map values to their corresponding headers
-        local row_index = tonumber(line:match("|%s*(%d+)")) -- Extract the row index
+        local row_index = tonumber(line:match(self.config.delimiter .. "%s*(%d+)")) -- Extract the row index
         local col_index = 1                                 -- Track the column index for mapping
-        for value in line:gmatch("|%s*([^|]+)%s*") do
+        for value in line:gmatch(self.config.delimiter .. "%s*([^" .. self.config.delimiter .. "]+)%s*") do
           local header = headers[col_index]
           if row_index then
             -- Map the value to the correct header and row index
@@ -165,6 +165,7 @@ function Parsing:resolve_expression(expression)
       return table.concat(data, operator):gsub(vim.pesc(expression), "")
     end)
 
+  -- TODO: Make Tablename optional
   -- Replace references like Table.Column.Row with actual values
   expression = expression:gsub("(%w+).(%w+).(%d+)", function(table_name, column_name, row_index)
     local table_data = self.rows[table_name] -- Get the table data by name
