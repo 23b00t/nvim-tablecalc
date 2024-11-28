@@ -75,6 +75,10 @@ function Core:insert_table(cols, rows, headers)
     table.insert(header, use_headers and (headers_table[c] or "") or " ")
   end
 
+  -- Add the top border
+  table.insert(tbl, "|" .. string.rep("----|", cols + 1))
+
+  -- Add the header row and separator
   table.insert(tbl, "| " .. table.concat(header, " | ") .. " |")
   table.insert(tbl, "|" .. string.rep("-----|", cols + 1)) -- Separator row
 
@@ -86,6 +90,9 @@ function Core:insert_table(cols, rows, headers)
     end
     table.insert(tbl, "| " .. table.concat(row, " | ") .. " |")
   end
+
+  -- Add the bottom border
+  table.insert(tbl, "|" .. string.rep("----|", cols + 1))
 
   -- Insert the table into the current buffer
   vim.api.nvim_put(tbl, "l", true, true)
