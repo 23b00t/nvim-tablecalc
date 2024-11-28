@@ -6,7 +6,38 @@ local Parsing = TableCalc.get_instance():get_parsing()
 -- Defining the test suite
 TestParsing = {}
 
-local input = [[
+function TestParsing:setUp()
+  -- Save the original _G.vim value
+  self.original_vim = _G.vim
+  -- Mock filetype to not get nil in Config:get_table_name_marker()
+  _G.vim = {
+    bo = { filetype = "org" }
+  }
+
+  -- Expected output table (kept as it is)
+  self.expected_output = {
+    S = {
+      [""] = { "1", "2", "3", "4" },
+      Name = { "Item", "Fish", "Apple", "Sum" },
+      Price = { "5", "23", "5", "" },
+      Sum = { "", "{sum(S, nil, 2)}", "{ 3 * 3}", "" },
+      c = { "3", "5", "23", "" }
+    },
+    t = {
+      [""] = { "1", "2", "3", "4" },
+      N = { "5", "5", "23", "{sum(t, N)}" },
+      Test = { "Item", "Fish", "Apple", "sum" }
+    },
+    table = {
+      [""] = { "1", "2" },
+      Name = { "Super", "Toll" },
+      Sum = { "{S.c.3 + S.c.2}", "{ 3 + 5}" }
+    }
+  }
+end
+
+function TestParsing:test_parse_structured_table_with_complex_data()
+  local input = [[
 * My table
 # Super as S
 |   | Name  | Count c | Price | Sum              |
@@ -37,44 +68,12 @@ local input = [[
 | 2 | Toll  | { 3 + 5}        |
 ]]
 
--- Expected output table (kept as it is)
-local expected_output = {
-  S = {
-    [""] = { "1", "2", "3", "4" },
-    Name = { "Item", "Fish", "Apple", "Sum" },
-    Price = { "5", "23", "5", "" },
-    Sum = { "", "{sum(S, nil, 2)}", "{ 3 * 3}", "" },
-    c = { "3", "5", "23", "" }
-  },
-  t = {
-    [""] = { "1", "2", "3", "4" },
-    N = { "5", "5", "23", "{sum(t, N)}" },
-    Test = { "Item", "Fish", "Apple", "sum" }
-  },
-  table = {
-    [""] = { "1", "2" },
-    Name = { "Super", "Toll" },
-    Sum = { "{S.c.3 + S.c.2}", "{ 3 + 5}" }
-  }
-}
-
-function TestParsing:test_parse_structured_table_with_complex_data()
-  -- Save the original _G.vim value
-  local original_vim = _G.vim
-  -- Mock filetype to not get nil in Config:get_table_name_marker()
-  _G.vim = {
-    bo = { filetype = "org" }
-  }
-
   -- Act: Call the method with input data
   local result = Parsing:parse_structured_table(input)
 
-  -- Assert: Überprüfen, ob das Ergebnis mit der erwarteten Ausgabe übereinstimmt
-  luaunit.assertEquals(result, expected_output,
+  -- Assert
+  luaunit.assertEquals(result, self.expected_output,
     "parse_structured_table should return the expected complex structured data")
-
-  -- Restore the original _G.vim value after the test
-  _G.vim = original_vim
 end
 
 function TestParsing:test_parse_headers()
@@ -95,7 +94,7 @@ function TestParsing:test_process_data()
   }
 
   -- Act: Call the method with input data
-  local result = Parsing:process_data(expected_output)
+  local result = Parsing:process_data(self.expected_output)
   local expected = {
     "{sum(S, nil, 2)}: 28",
     "{ 3 * 3}: 9",
@@ -109,4 +108,9 @@ function TestParsing:test_process_data()
   table.sort(expected)
   luaunit.assertEquals(result, expected,
     "process_data should return the expected table, regardless of order")
+end
+
+-- Restore the original _G.vim value after the test
+function TestParsing:tearDown()
+  _G.vim = self.original_vim
 end

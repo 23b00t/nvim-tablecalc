@@ -17,5 +17,6 @@ require('tests.test_core')
 
 -- Run the tests
 local lu = luaunit.LuaUnit.new()
+-- Default to output in TAP format
 lu:setOutputType("tap")
 os.exit( lu:runSuite() )

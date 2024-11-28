@@ -5,6 +5,11 @@ local TableCalc = _G.TableCalc
 -- Defining the test suite
 TestTableCalc = {}
 
+-- Save original vim table to restore it after mocking it in tests
+function TestTableCalc:setUp()
+  self.original_vim = _G.vim
+end
+
 -- Check if get_instance creates a new instance with a Parsing object
 function TestTableCalc:test_get_instance()
   local instance = TableCalc.get_instance()
@@ -116,4 +121,9 @@ function TestTableCalc:test_get_parsing()
   local instance = TableCalc.get_instance()
   local utils = instance:get_parsing()
   luaunit.assertNotNil(utils, "Parsing object should be returned")
+end
+
+-- Restore the original _G.vim value after the test
+function TestTableCalc:tearDown()
+  _G.vim = self.original_vim
 end

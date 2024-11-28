@@ -1,7 +1,6 @@
 local luaunit = require('luaunit')
 
-local TableCalc = _G.TableCalc
-local Utils = TableCalc.get_instance():get_utils()
+local Utils = require('nvim-tablecalc.utils')
 
 -- Defining the test suite
 TestUtils = {}
