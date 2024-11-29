@@ -175,8 +175,6 @@ function Parsing:resolve_expression(expression)
       return table.concat(data, operator):gsub(vim.pesc(expression), "")
     end)
 
-  -- Only execute the second block if no changes were made in the first
-  if modified_expression == expression then
     -- Replace references like Table.Column.Row with actual values
     modified_expression = modified_expression:gsub("(%w*)%.?(%w+).(%d+)", function(table_name, column_name, row_index)
       -- Use `self.table_name` if the table name is missing, which means: refer to the calling table
@@ -188,7 +186,6 @@ function Parsing:resolve_expression(expression)
         return row_value ~= '' and tostring(row_value) or '0' -- Convert the value to a string for Lua expressions
       end
     end)
-  end
 
   return modified_expression
 end

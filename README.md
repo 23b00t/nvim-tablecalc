@@ -45,6 +45,11 @@
 
 ## Open Questions
 - Should TableCreate be a seperate plugin? Re-think structure...
-
+- Why is it neccessary to call both gsub expressions in Paring:resolve_expression? Test it with asoc_table2.org data.
+    - It would be cheaper to use this logic:
+    ``` lua
+    -- Only execute the second block if no changes were made in the first
+    if modified_expression == expression then execute_second_statement end
+    ```  
 
 Today is Pungenday, the 26th day of The Aftermath in the YOLD 3190
