@@ -49,7 +49,7 @@ function Parsing:parse_structured_table(content)
       else
         -- Parse table rows and map values to their corresponding headers
         local row_index = tonumber(line:match(self.config.delimiter .. "%s*(%d+)")) -- Extract the row index
-        local col_index = 1                                 -- Track the column index for mapping
+        local col_index = 1                                                         -- Track the column index for mapping
         for value in line:gmatch(self.config.delimiter .. "%s*([^" .. self.config.delimiter .. "]+)%s*") do
           local header = headers[col_index]
           if row_index then
@@ -87,6 +87,8 @@ function Parsing:process_data(table_data)
   self.rows = table_data -- Use the table data for processing
   -- Iterate through all tables and their columns
   for table_name, table_content in pairs(table_data) do
+    -- Save table name for later use in self:resolve_expression
+    self.table_name = table_name
     for column, values in pairs(table_content) do
       for i, cell in ipairs(values) do
         -- Detect if the cell contains a formula
@@ -145,8 +147,9 @@ end
 --- Resolves references in a formula to their corresponding values
 ---@param expression string The expression containing references to be resolved
 function Parsing:resolve_expression(expression)
-  -- Resolve sum end mul expressions
-  expression = expression:gsub("([sm]u[ml])%((%w+),%s*(%w+),?%s*(%d*)%)",
+  -- Resolve sum and mul expressions
+  -- WARNING: mum and sul do the same as mul, but maybe it's a feature, fnord
+  local modified_expression = expression:gsub("([sm]u[ml])%((%w+),%s*(%w+),?%s*(%d*)%)",
     function(operation, table_name, column_name, row_index)
       local data = {}
       if row_index == '' then
@@ -165,18 +168,22 @@ function Parsing:resolve_expression(expression)
       return table.concat(data, operator):gsub(vim.pesc(expression), "")
     end)
 
-  -- TODO: Make Tablename optional
-  -- Replace references like Table.Column.Row with actual values
-  expression = expression:gsub("(%w+).(%w+).(%d+)", function(table_name, column_name, row_index)
-    local table_data = self.rows[table_name] -- Get the table data by name
-    if table_data and table_data[column_name] then
-      local row_value = table_data[column_name][tonumber(row_index)]
-      -- if the value is not empty return it as string else return '0' (to handle empty fields as 0)
-      return row_value ~= '' and tostring(row_value) or '0' -- Convert the value to a string for Lua expressions
-    end
-  end)
+  -- Only execute the second block if no changes were made in the first
+  if modified_expression == expression then
+    -- Replace references like Table.Column.Row with actual values
+    modified_expression = modified_expression:gsub("(%w*)%.?(%w+).(%d+)", function(table_name, column_name, row_index)
+      -- Use `self.table_name` if the table name is missing, which means: refer to the calling table
+      if table_name == "" then table_name = self.table_name end
+      local table_data = self.rows[table_name] -- Get the table data by name
+      if table_data and table_data[column_name] then
+        local row_value = table_data[column_name][tonumber(row_index)]
+        -- if the value is not empty return it as string else return '0' (to handle empty fields as 0)
+        return row_value ~= '' and tostring(row_value) or '0' -- Convert the value to a string for Lua expressions
+      end
+    end)
+  end
 
-  return expression
+  return modified_expression
 end
 
 return Parsing
