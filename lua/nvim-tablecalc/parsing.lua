@@ -101,7 +101,10 @@ function Parsing:process_data(table_data)
           else
             -- Evaluate the formula and append the result to the cell
             local result = self:evaluate_formula(cell)
-            table.insert(results, self.config.formula_begin .. formula .. self.config.formula_end .. ": " .. result)
+            -- Give back 0 if result is nil i.e. only a cell containing a word was referenced
+            -- in a formula, which means an empty string was evaluated by load
+            table.insert(results,
+              self.config.formula_begin .. formula .. self.config.formula_end .. ": " .. (result or 0))
           end
         end
       end
@@ -118,6 +121,11 @@ function Parsing:evaluate_formula(formula)
   -- Resolve references in the formula to their actual values
   local expression = self:resolve_recursive(formula)
   local simplifyed_expression = self.utils:simplify_expression(expression)
+  -- TODO: if simplifyed_expression == "" then return expression end
+  -- If the cell only contains non numeric or mathematical expressions, simplify_expression will return empty.
+  -- Than just directly return the expression as result, i.e. the word written in the cell
+  -- It should be decided if this would be a feature.
+
   -- Load and execute the expression in the Lua environment if it is a math expression
   local func, err = load("return " .. simplifyed_expression)
   if func then
@@ -140,15 +148,14 @@ function Parsing:resolve_recursive(expression)
   end
   -- clear intermediat results (: %d+) from the string
   expression = expression:gsub(":%s*-?[%d%.]*", '')
-
   return expression
 end
 
 --- Resolves references in a formula to their corresponding values
 ---@param expression string The expression containing references to be resolved
 function Parsing:resolve_expression(expression)
-  -- Resolve sum and mul expressions
-  -- WARNING: mum and sul do the same as mul, but maybe it's a feature, fnord
+  -- Resolve sum and mul expressions (get data to sum or multiply columns or rows)
+  -- INFO: mum and sul do the same as mul, but maybe it's a feature, fnord
   local modified_expression = expression:gsub("([sm]u[ml])%((%w+),%s*(%w+),?%s*(%d*)%)",
     function(operation, table_name, column_name, row_index)
       local data = {}
@@ -168,8 +175,6 @@ function Parsing:resolve_expression(expression)
       return table.concat(data, operator):gsub(vim.pesc(expression), "")
     end)
 
-  -- Only execute the second block if no changes were made in the first
-  if modified_expression == expression then
     -- Replace references like Table.Column.Row with actual values
     modified_expression = modified_expression:gsub("(%w*)%.?(%w+).(%d+)", function(table_name, column_name, row_index)
       -- Use `self.table_name` if the table name is missing, which means: refer to the calling table
@@ -181,7 +186,6 @@ function Parsing:resolve_expression(expression)
         return row_value ~= '' and tostring(row_value) or '0' -- Convert the value to a string for Lua expressions
       end
     end)
-  end
 
   return modified_expression
 end
